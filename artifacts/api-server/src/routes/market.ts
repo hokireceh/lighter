@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { getOrderBookDepth, getCandles } from "../lib/lighterApi";
 import { getMarkets, getMarketInfo, type MarketInfo } from "../lib/marketCache";
+import { logger } from "../lib/logger";
 
 const router = Router();
 
@@ -11,12 +12,18 @@ const SPARKLINE_TTL = 30 * 60 * 1000;
 // ─── In-flight deduplication: prevents duplicate API calls for the same market ─
 const inFlightSparkline = new Map<number, Promise<number[]>>();
 
-// ─── Throttle: max 2 concurrent, 600ms delay per batch ───────────────────────
+// ─── Global background-fetch lock: only one sweep runs at a time ──────────────
+let bgFetchRunning = false;
+
+// ─── Rate-safe throttle: 1 concurrent request at a time ──────────────────────
+// Lighter standard accounts: 60 req/min total.
+// 1 req per 1200ms ≈ 50 req/min — leaves headroom for other API calls.
+// 168 markets × 1200ms ≈ 3.4 min — acceptable since cache TTL is 30 min.
 async function throttleAll<T>(
   items: number[],
   fn: (item: number) => Promise<T>,
-  concurrency = 2,
-  delayMs = 600
+  concurrency = 1,
+  delayMs = 1200
 ): Promise<T[]> {
   const results: T[] = [];
   for (let i = 0; i < items.length; i += concurrency) {
@@ -30,7 +37,7 @@ async function throttleAll<T>(
   return results;
 }
 
-async function getSparkline(marketId: number): Promise<number[]> {
+async function fetchOneSparkline(marketId: number): Promise<number[]> {
   const cached = sparklineCache.get(marketId);
   if (cached && Date.now() - cached.fetchedAt < SPARKLINE_TTL) return cached.prices;
 
@@ -52,6 +59,34 @@ async function getSparkline(marketId: number): Promise<number[]> {
 
   inFlightSparkline.set(marketId, promise);
   return promise;
+}
+
+// ─── Background sparkline sweep ───────────────────────────────────────────────
+// Fetches sparklines for every market that is missing or stale, at a rate-safe
+// pace (1 req/1200ms). Runs asynchronously — never blocks an HTTP response.
+function triggerBackgroundFetch(marketIds: number[]): void {
+  if (bgFetchRunning) return;
+
+  const stale = marketIds.filter((id) => {
+    const c = sparklineCache.get(id);
+    return !c || Date.now() - c.fetchedAt >= SPARKLINE_TTL;
+  });
+
+  if (stale.length === 0) return;
+
+  bgFetchRunning = true;
+  logger.info({ count: stale.length }, "[Sparkline] Background fetch started");
+
+  throttleAll(stale, fetchOneSparkline, 1, 1200)
+    .then(() => {
+      logger.info({ count: stale.length }, "[Sparkline] Background fetch complete");
+    })
+    .catch((err) => {
+      logger.warn({ err }, "[Sparkline] Background fetch error");
+    })
+    .finally(() => {
+      bgFetchRunning = false;
+    });
 }
 
 function toRow(m: MarketInfo, sparkline: number[]) {
@@ -77,12 +112,19 @@ function toRow(m: MarketInfo, sparkline: number[]) {
 }
 
 // ─── GET /market/all ─────────────────────────────────────────────────────────
+// Returns immediately using whatever sparklines are already cached.
+// A background sweep fills any missing/stale sparklines at a rate-safe pace.
+// This avoids blocking the response on 168 sequential Lighter API calls.
 router.get("/all", async (req, res) => {
   try {
     const markets = await getMarkets();
-    const sparklines = await throttleAll(markets.map((m) => m.index), getSparkline, 5, 300)
-      .then(results => results.map(r => ({ status: "fulfilled" as const, value: r })));
-    const sl = (i: number) => (sparklines[i].status === "fulfilled" ? sparklines[i].value : []);
+    const marketIds = markets.map((m) => m.index);
+
+    // Return cached sparklines instantly (empty [] for markets not yet fetched)
+    const sl = (id: number) => sparklineCache.get(id)?.prices ?? [];
+
+    // Start background fetch for any stale/missing sparklines (non-blocking)
+    triggerBackgroundFetch(marketIds);
 
     const totalVolume24h = markets.reduce((s, m) => s + m.dailyVolumeQuote, 0);
     const totalOpenInterest = markets.reduce((s, m) => s + (m.openInterest ?? 0), 0);
@@ -91,20 +133,20 @@ router.get("/all", async (req, res) => {
     const gainers = byChange
       .filter((m) => m.dailyPriceChange > 0)
       .slice(0, 6)
-      .map((m) => toRow(m, sl(markets.indexOf(m))));
+      .map((m) => toRow(m, sl(m.index)));
     const losers = byChange
       .filter((m) => m.dailyPriceChange < 0)
       .reverse()
       .slice(0, 6)
-      .map((m) => toRow(m, sl(markets.indexOf(m))));
+      .map((m) => toRow(m, sl(m.index)));
 
     const recentlyListed = [...markets]
       .sort((a, b) => b.index - a.index)
       .slice(0, 6)
-      .map((m) => toRow(m, sl(markets.indexOf(m))));
+      .map((m) => toRow(m, sl(m.index)));
 
     res.json({
-      markets: markets.map((m, i) => toRow(m, sl(i))),
+      markets: markets.map((m) => toRow(m, sl(m.index))),
       stats: {
         totalMarkets: markets.length,
         totalVolume24h,
