@@ -5,10 +5,18 @@ import { rateLimit } from "express-rate-limit";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { db } from "@workspace/db";
+import { sql } from "drizzle-orm";
 import { restoreRunningBots, startLogCleanupSchedule, startTradePollSchedule } from "./lib/botEngine";
 import { startTelegramBot } from "./lib/telegramBot";
 
 const app: Express = express();
+
+// ─── Reverse Proxy Trust ──────────────────────────────────────────────────────
+// Required when running behind Nginx / Caddy / Replit proxy.
+// Without this, express-rate-limit cannot read the real client IP from
+// X-Forwarded-For and throws ERR_ERL_UNEXPECTED_X_FORWARDED_FOR.
+app.set("trust proxy", 1);
 
 // ─── Security Headers ─────────────────────────────────────────────────────────
 app.use(
@@ -77,6 +85,16 @@ app.use("/api/auth", authLimiter);
 app.use("/api", apiLimiter);
 
 app.use("/api", router);
+
+// ─── Auto DB Migration: add password_hash column if missing ──────────────────
+// Ensures VPS deployments work without requiring a manual `pnpm db:push`.
+db.execute(sql`
+  ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash text
+`).then(() => {
+  logger.info("DB migration: password_hash column ensured");
+}).catch((err) => {
+  logger.warn({ err }, "DB migration: could not add password_hash column (may already exist)");
+});
 
 // Restore bots after startup
 setTimeout(() => {
