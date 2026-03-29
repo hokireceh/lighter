@@ -1,19 +1,24 @@
+import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
-import NotFound from "@/pages/not-found";
 import Login from "@/pages/Login";
-import Admin from "@/pages/Admin";
 
-import { AppLayout } from "@/components/layout/AppLayout";
-import Dashboard from "@/pages/Dashboard";
-import Markets from "@/pages/Markets";
-import Strategies from "@/pages/Strategies";
-import Trades from "@/pages/Trades";
-import Logs from "@/pages/Logs";
-import Settings from "@/pages/Settings";
+// Lazy-loaded pages — each becomes a separate JS chunk (~100-200KB each)
+// Browser only downloads the chunk for the page the user actually visits
+const Admin = lazy(() => import("@/pages/Admin"));
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const Markets = lazy(() => import("@/pages/Markets"));
+const Strategies = lazy(() => import("@/pages/Strategies"));
+const Trades = lazy(() => import("@/pages/Trades"));
+const Logs = lazy(() => import("@/pages/Logs"));
+const Settings = lazy(() => import("@/pages/Settings"));
+const NotFound = lazy(() => import("@/pages/not-found"));
+const AppLayout = lazy(() =>
+  import("@/components/layout/AppLayout").then((m) => ({ default: m.AppLayout }))
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,40 +29,46 @@ const queryClient = new QueryClient({
   },
 });
 
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="text-muted-foreground animate-pulse">Memuat...</div>
+    </div>
+  );
+}
+
 function AuthenticatedRouter() {
   const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-muted-foreground animate-pulse">Memuat...</div>
-      </div>
-    );
-  }
+  if (isLoading) return <PageLoader />;
 
-  if (!isAuthenticated) {
-    return <Login />;
-  }
+  if (!isAuthenticated) return <Login />;
 
   return (
-    <AppLayout>
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/markets" component={Markets} />
-        <Route path="/strategies" component={Strategies} />
-        <Route path="/trades" component={Trades} />
-        <Route path="/logs" component={Logs} />
-        <Route path="/settings" component={Settings} />
-        <Route component={NotFound} />
-      </Switch>
-    </AppLayout>
+    <Suspense fallback={<PageLoader />}>
+      <AppLayout>
+        <Switch>
+          <Route path="/" component={Dashboard} />
+          <Route path="/markets" component={Markets} />
+          <Route path="/strategies" component={Strategies} />
+          <Route path="/trades" component={Trades} />
+          <Route path="/logs" component={Logs} />
+          <Route path="/settings" component={Settings} />
+          <Route component={NotFound} />
+        </Switch>
+      </AppLayout>
+    </Suspense>
   );
 }
 
 function Router() {
   return (
     <Switch>
-      <Route path="/admin" component={Admin} />
+      <Route path="/admin">
+        <Suspense fallback={<PageLoader />}>
+          <Admin />
+        </Suspense>
+      </Route>
       <Route>
         <AuthenticatedRouter />
       </Route>

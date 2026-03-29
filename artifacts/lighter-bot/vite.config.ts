@@ -44,6 +44,32 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist"),
     emptyOutDir: false,
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          // React core — always needed, cached aggressively
+          if (id.includes("node_modules/react/") || id.includes("node_modules/react-dom/")) {
+            return "vendor-react";
+          }
+          // Data fetching & routing — shared by all pages
+          if (id.includes("node_modules/@tanstack/") || id.includes("node_modules/wouter")) {
+            return "vendor-query";
+          }
+          // Radix UI components — shared UI primitives
+          if (id.includes("node_modules/@radix-ui/")) {
+            return "vendor-ui";
+          }
+          // Charting — heavy, only needed on chart pages
+          if (id.includes("node_modules/recharts") || id.includes("node_modules/d3-")) {
+            return "vendor-charts";
+          }
+          // Decimal.js + other utilities
+          if (id.includes("node_modules/decimal.js") || id.includes("node_modules/date-fns")) {
+            return "vendor-utils";
+          }
+        },
+      },
+    },
   },
   server: {
     port,

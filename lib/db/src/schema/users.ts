@@ -8,6 +8,7 @@ export const usersTable = pgTable("users", {
   telegramUsername: text("telegram_username"),
   telegramName: text("telegram_name"),
   password: text("password").notNull().unique(),
+  passwordHash: text("password_hash"),
   plan: text("plan").notNull(),
   expiresAt: timestamp("expires_at").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
