@@ -12,6 +12,7 @@ export default function Logs() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const userScrolledUp = useRef(false);
   const [copied, setCopied] = useState(false);
+  const [copiedRowId, setCopiedRowId] = useState<number | null>(null);
 
   const handleCopyAll = () => {
     if (!logs.length) return;
@@ -25,6 +26,18 @@ export default function Logs() {
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const handleCopyRow = (log: typeof logs[0]) => {
+    const ts = `[${formatWIBDateTime(log.createdAt)}]`;
+    const level = log.level.toUpperCase().padEnd(7);
+    const name = (log.strategyName || "SYSTEM").padEnd(20);
+    const msg = log.details ? `${log.message}  ${log.details}` : log.message;
+    const text = `${ts} ${level} ${name} ${msg}`;
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedRowId(log.id);
+      setTimeout(() => setCopiedRowId(null), 1500);
     });
   };
 
@@ -67,6 +80,14 @@ export default function Logs() {
             <div className="w-3 h-3 rounded-full bg-success"></div>
           </div>
           <div className="text-xs font-mono text-muted-foreground">tail -f /var/log/lighter-bot.log</div>
+          <button
+            onClick={handleCopyAll}
+            className="flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded hover:bg-white/10"
+            title="Salin semua log"
+          >
+            {copied ? <Check className="w-3 h-3 text-success" /> : <Copy className="w-3 h-3" />}
+            <span>{copied ? "Tersalin!" : "Salin semua"}</span>
+          </button>
         </div>
 
         <CardContent className="p-0 flex-1 overflow-hidden">
@@ -91,7 +112,9 @@ export default function Logs() {
                   return (
                     <div
                       key={log.id}
-                      className="flex gap-2 sm:gap-4 hover:bg-white/5 px-2 py-0.5 rounded transition-colors break-all"
+                      className="group flex gap-2 sm:gap-4 hover:bg-white/5 px-2 py-0.5 rounded transition-colors break-all cursor-pointer"
+                      onClick={() => handleCopyRow(log)}
+                      title="Klik untuk menyalin baris ini"
                     >
                       <span className="text-muted-foreground shrink-0 w-[4.5rem] sm:w-36 truncate">
                         [{formatWIBDateTime(log.createdAt)}]
@@ -109,6 +132,11 @@ export default function Logs() {
                             {log.details}
                           </span>
                         )}
+                      </span>
+                      <span className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground flex items-start pt-0.5">
+                        {copiedRowId === log.id
+                          ? <Check className="w-3 h-3 text-success" />
+                          : <Copy className="w-3 h-3" />}
                       </span>
                     </div>
                   );
