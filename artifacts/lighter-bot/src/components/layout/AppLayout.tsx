@@ -23,12 +23,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   const navItems = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/markets", label: "Markets", icon: LineChart },
-    { href: "/strategies", label: "Strategies", icon: Bot },
-    { href: "/trades", label: "Trades", icon: History },
-    { href: "/logs", label: "Logs", icon: Terminal },
+    { href: "/markets", label: "Pasar", icon: LineChart },
+    { href: "/strategies", label: "Strategi", icon: Bot },
+    { href: "/trades", label: "Trade", icon: History },
+    { href: "/logs", label: "Log", icon: Terminal },
     { href: "/ai-advisor", label: "AI Advisor", icon: Sparkles },
-    { href: "/settings", label: "Settings", icon: Settings },
+    { href: "/settings", label: "Pengaturan", icon: Settings },
   ];
 
   const isConfigured = config?.hasPrivateKey && config?.accountIndex !== null;
@@ -86,7 +86,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 </span>
               </div>
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs text-muted-foreground">Expire</span>
+                <span className="text-xs text-muted-foreground">Kadaluarsa</span>
                 <span className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">
                   {user.isAdmin || !user.expiresAt
                     ? "Lifetime"
@@ -107,12 +107,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   <span className={`relative inline-flex rounded-full h-2 w-2 ${isConfigured ? 'bg-success' : 'bg-warning'}`}></span>
                 </span>
                 <span className={`text-xs font-medium ${isConfigured ? 'text-success' : 'text-warning'}`}>
-                  {isConfigured ? "Ready" : "Setup Required"}
+                  {isConfigured ? "Siap" : "Perlu Konfigurasi"}
                 </span>
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Network</span>
+              <span className="text-xs text-muted-foreground">Jaringan</span>
               <span className="text-xs font-mono text-foreground bg-muted px-1.5 py-0.5 rounded">
                 {config?.network || 'Unknown'}
               </span>
@@ -129,9 +129,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
         
         {!isConfigured && location !== "/settings" && (
           <div className="bg-warning/10 border-b border-warning/20 px-6 py-3 flex items-center justify-center gap-2 backdrop-blur-md z-20">
-            <span className="text-warning text-sm font-medium">API Keys not configured. Paper trading mode only or limited functionality.</span>
+            <span className="text-warning text-sm font-medium">API Key belum dikonfigurasi. Mode paper trading atau fitur terbatas.</span>
             <Link href="/settings" className="text-xs bg-warning/20 hover:bg-warning/30 text-warning px-2 py-1 rounded transition-colors">
-              Configure Settings
+              Buka Pengaturan
             </Link>
           </div>
         )}

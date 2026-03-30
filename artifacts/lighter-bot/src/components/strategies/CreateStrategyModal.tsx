@@ -17,10 +17,10 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 const dcaSchema = z.object({
-  name: z.string().min(3, "Name must be at least 3 characters"),
-  marketIndex: z.coerce.number({ required_error: "Please select a market" }),
-  amountPerOrder: z.coerce.number().positive("Amount must be positive"),
-  intervalMinutes: z.coerce.number().min(1, "Interval must be at least 1 minute"),
+  name: z.string().min(3, "Nama minimal 3 karakter"),
+  marketIndex: z.coerce.number({ required_error: "Pilih pasar terlebih dahulu" }),
+  amountPerOrder: z.coerce.number().positive("Jumlah harus positif"),
+  intervalMinutes: z.coerce.number().min(1, "Interval minimal 1 menit"),
   side: z.enum(["buy", "sell"]),
   orderType: z.enum(["market", "limit", "post_only"]),
   limitPriceOffset: z.coerce.number().min(0).optional(),
@@ -36,25 +36,25 @@ const optionalPositiveNumber = z.preprocess(
 );
 
 const gridSchema = z.object({
-  name: z.string().min(3, "Name must be at least 3 characters"),
-  marketIndex: z.coerce.number({ required_error: "Please select a market" }),
-  lowerPrice: z.coerce.number().positive("Lower price must be positive"),
-  upperPrice: z.coerce.number().positive("Upper price must be positive"),
+  name: z.string().min(3, "Nama minimal 3 karakter"),
+  marketIndex: z.coerce.number({ required_error: "Pilih pasar terlebih dahulu" }),
+  lowerPrice: z.coerce.number().positive("Harga bawah harus positif"),
+  upperPrice: z.coerce.number().positive("Harga atas harus positif"),
   gridLevels: z.coerce.number().min(2).max(100),
-  amountPerGrid: z.coerce.number().positive("Amount must be positive"),
+  amountPerGrid: z.coerce.number().positive("Jumlah harus positif"),
   mode: z.enum(["neutral", "long", "short"]),
   orderType: z.enum(["market", "limit", "post_only"]),
   limitPriceOffset: z.coerce.number().min(0).optional(),
   stopLoss: optionalPositiveNumber,
   takeProfit: optionalPositiveNumber,
 }).refine(data => data.upperPrice > data.lowerPrice, {
-  message: "Upper price must be greater than lower price",
+  message: "Harga atas harus lebih besar dari harga bawah",
   path: ["upperPrice"],
 }).refine(data => !data.stopLoss || data.stopLoss < data.lowerPrice, {
-  message: "Stop Loss must be below Lower Price (otherwise bot stops immediately)",
+  message: "Stop Loss harus di bawah Harga Bawah (agar bot tidak langsung berhenti)",
   path: ["stopLoss"],
 }).refine(data => !data.takeProfit || data.takeProfit > data.upperPrice, {
-  message: "Take Profit must be above Upper Price (otherwise bot stops immediately)",
+  message: "Take Profit harus di atas Harga Atas (agar bot tidak langsung berhenti)",
   path: ["takeProfit"],
 });
 
@@ -85,16 +85,16 @@ function MarketPicker({ selectedMarket, onSelect, error, markets }: MarketPicker
             {selectedMarket ? (
               <span className="font-mono text-sm">{selectedMarket.label}</span>
             ) : (
-              <span className="text-muted-foreground">Search market (e.g. BTC, ETH)...</span>
+              <span className="text-muted-foreground">Cari pasar (mis. BTC, ETH)...</span>
             )}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[400px] p-0 z-[200]" align="start">
           <Command>
-            <CommandInput placeholder="Search market..." />
+            <CommandInput placeholder="Cari pasar..." />
             <CommandList className="max-h-[240px] overflow-y-auto">
-              <CommandEmpty>No market found.</CommandEmpty>
+              <CommandEmpty>Pasar tidak ditemukan.</CommandEmpty>
               <CommandGroup>
                 {markets.map(m => {
                   const label = `${m.symbol} (${m.type})`;
@@ -153,7 +153,7 @@ function AIInsightCard({ result }: { result: AIResult }) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-xs font-medium text-primary">
           <Sparkles className="w-3.5 h-3.5" />
-          AI Analysis — {result.modelTier}
+          Analisis AI — {result.modelTier}
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -161,9 +161,9 @@ function AIInsightCard({ result }: { result: AIResult }) {
             <span className="capitalize">{result.marketCondition}</span>
           </div>
           <Badge variant="outline" className={cn("text-xs px-1.5 py-0", riskColor)}>
-            {result.riskLevel} risk
+            {result.riskLevel === "low" ? "risiko rendah" : result.riskLevel === "medium" ? "risiko sedang" : "risiko tinggi"}
           </Badge>
-          <span className="text-xs text-muted-foreground">{result.confidence}% confidence</span>
+          <span className="text-xs text-muted-foreground">{result.confidence}% keyakinan</span>
         </div>
       </div>
       <p className="text-xs text-muted-foreground leading-relaxed">{result.reasoning}</p>
@@ -222,18 +222,18 @@ function DcaForm({ markets, onSuccess, onCancel }: DcaFormProps) {
   const createMutation = useCreateStrategy({
     mutation: {
       onSuccess: () => {
-        toast({ title: "Strategy Created", description: "Your DCA bot is ready." });
+        toast({ title: "Strategi Dibuat", description: "Bot DCA kamu siap." });
         onSuccess();
       },
       onError: (err: any) => {
-        toast({ title: "Error", description: err.message || "Failed to create strategy", variant: "destructive" });
+        toast({ title: "Kesalahan", description: err.message || "Gagal membuat strategi", variant: "destructive" });
       },
     },
   });
 
   const handleAIAnalyze = async () => {
     if (!selectedMarket) {
-      toast({ title: "Select a market first", description: "Choose a market before running AI analysis.", variant: "destructive" });
+      toast({ title: "Pilih pasar terlebih dahulu", description: "Pilih pasar sebelum menjalankan analisis AI.", variant: "destructive" });
       return;
     }
     setAiLoading(true);
@@ -241,7 +241,7 @@ function DcaForm({ markets, onSuccess, onCancel }: DcaFormProps) {
     try {
       const data = await fetchAIAnalysis("dca", selectedMarket.index);
       const rec = data.dca_params;
-      if (!rec) throw new Error("AI did not return DCA parameters");
+      if (!rec) throw new Error("AI tidak mengembalikan parameter DCA");
       const amountPerOrder = sanitizeAINumber(rec.amountPerOrder);
       const intervalMinutes = sanitizeAINumber(rec.intervalMinutes);
       const limitPriceOffset = sanitizeAINumber(rec.limitPriceOffset);
@@ -251,9 +251,9 @@ function DcaForm({ markets, onSuccess, onCancel }: DcaFormProps) {
       if (rec.orderType) form.setValue("orderType", rec.orderType);
       if (limitPriceOffset !== undefined) form.setValue("limitPriceOffset", limitPriceOffset);
       setAiResult({ reasoning: data.reasoning, marketCondition: data.marketCondition, riskLevel: data.riskLevel, confidence: data.confidence, modelUsed: data.modelUsed, modelTier: data.modelTier });
-      toast({ title: "AI Analysis Complete", description: `Parameters auto-filled using ${data.modelTier}` });
+      toast({ title: "Analisis AI Selesai", description: `Parameter diisi otomatis menggunakan ${data.modelTier}` });
     } catch (err: any) {
-      toast({ title: "AI Analysis Failed", description: err.message, variant: "destructive" });
+      toast({ title: "Analisis AI Gagal", description: err.message, variant: "destructive" });
     } finally {
       setAiLoading(false);
     }
@@ -279,8 +279,8 @@ function DcaForm({ markets, onSuccess, onCancel }: DcaFormProps) {
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4 space-y-4">
       <div className="space-y-2">
-        <Label>Strategy Name</Label>
-        <Input {...form.register("name")} placeholder="e.g. ETH Weekly Accumulation" className="bg-background" />
+        <Label>Nama Strategi</Label>
+        <Input {...form.register("name")} placeholder="mis. ETH Akumulasi Mingguan" className="bg-background" />
         {form.formState.errors.name && <p className="text-xs text-destructive">{form.formState.errors.name.message}</p>}
       </div>
 
@@ -299,19 +299,19 @@ function DcaForm({ markets, onSuccess, onCancel }: DcaFormProps) {
         disabled={aiLoading}
       >
         {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-        {aiLoading ? "Analyzing market..." : "AI Auto-Fill Parameters"}
+        {aiLoading ? "Menganalisis pasar..." : "Isi Otomatis Parameter (AI)"}
       </Button>
 
       {aiResult && <AIInsightCard result={aiResult} />}
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Amount (USDC)</Label>
+          <Label>Jumlah (USDC)</Label>
           <Input type="text" inputMode="decimal" {...form.register("amountPerOrder")} placeholder="100" className="bg-background font-mono" />
           {form.formState.errors.amountPerOrder && <p className="text-xs text-destructive">{form.formState.errors.amountPerOrder.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label>Interval (Minutes)</Label>
+          <Label>Interval (Menit)</Label>
           <Input type="text" inputMode="numeric" {...form.register("intervalMinutes")} placeholder="1440" className="bg-background font-mono" />
           {form.formState.errors.intervalMinutes && <p className="text-xs text-destructive">{form.formState.errors.intervalMinutes.message}</p>}
         </div>
@@ -319,7 +319,7 @@ function DcaForm({ markets, onSuccess, onCancel }: DcaFormProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Side</Label>
+          <Label>Sisi</Label>
           <Select onValueChange={(v: any) => form.setValue("side", v)} value={form.watch("side") || "buy"}>
             <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -329,7 +329,7 @@ function DcaForm({ markets, onSuccess, onCancel }: DcaFormProps) {
           </Select>
         </div>
         <div className="space-y-2">
-          <Label>Order Type</Label>
+          <Label>Tipe Order</Label>
           <Select onValueChange={(v: any) => form.setValue("orderType", v)} value={form.watch("orderType") || "limit"}>
             <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -347,7 +347,7 @@ function DcaForm({ markets, onSuccess, onCancel }: DcaFormProps) {
             Limit Price Offset (USDC)
             <span className="ml-1.5 text-xs text-muted-foreground">— offset dari harga pasar saat eksekusi</span>
           </Label>
-          <Input type="text" inputMode="decimal" {...form.register("limitPriceOffset")} placeholder="e.g. 10" className="bg-background font-mono" />
+          <Input type="text" inputMode="decimal" {...form.register("limitPriceOffset")} placeholder="mis. 10" className="bg-background font-mono" />
           <p className="text-xs text-muted-foreground">
             Buy: order di <strong>bawah</strong> harga pasar. Sell: di <strong>atas</strong> harga pasar.
           </p>
@@ -356,10 +356,10 @@ function DcaForm({ markets, onSuccess, onCancel }: DcaFormProps) {
       )}
 
       <div className="pt-4 flex justify-end gap-3 border-t border-border">
-        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+        <Button type="button" variant="outline" onClick={onCancel}>Batal</Button>
         <Button type="submit" disabled={createMutation.isPending}>
           {createMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          Create Bot
+          Buat Bot
         </Button>
       </div>
     </form>
@@ -388,18 +388,18 @@ function GridForm({ markets, onSuccess, onCancel }: GridFormProps) {
   const createMutation = useCreateStrategy({
     mutation: {
       onSuccess: () => {
-        toast({ title: "Strategy Created", description: "Your Grid bot is ready." });
+        toast({ title: "Strategi Dibuat", description: "Bot Grid kamu siap." });
         onSuccess();
       },
       onError: (err: any) => {
-        toast({ title: "Error", description: err.message || "Failed to create strategy", variant: "destructive" });
+        toast({ title: "Kesalahan", description: err.message || "Gagal membuat strategi", variant: "destructive" });
       },
     },
   });
 
   const handleAIAnalyze = async () => {
     if (!selectedMarket) {
-      toast({ title: "Select a market first", description: "Choose a market before running AI analysis.", variant: "destructive" });
+      toast({ title: "Pilih pasar terlebih dahulu", description: "Pilih pasar sebelum menjalankan analisis AI.", variant: "destructive" });
       return;
     }
     setAiLoading(true);
@@ -407,7 +407,7 @@ function GridForm({ markets, onSuccess, onCancel }: GridFormProps) {
     try {
       const data = await fetchAIAnalysis("grid", selectedMarket.index);
       const rec = data.grid_params;
-      if (!rec) throw new Error("AI did not return Grid parameters");
+      if (!rec) throw new Error("AI tidak mengembalikan parameter Grid");
       const lowerPrice = sanitizeAINumber(rec.lowerPrice);
       const upperPrice = sanitizeAINumber(rec.upperPrice);
       const gridLevels = sanitizeAINumber(rec.gridLevels);
@@ -425,9 +425,9 @@ function GridForm({ markets, onSuccess, onCancel }: GridFormProps) {
       if (stopLoss) form.setValue("stopLoss", stopLoss);
       if (takeProfit) form.setValue("takeProfit", takeProfit);
       setAiResult({ reasoning: data.reasoning, marketCondition: data.marketCondition, riskLevel: data.riskLevel, confidence: data.confidence, modelUsed: data.modelUsed, modelTier: data.modelTier });
-      toast({ title: "AI Analysis Complete", description: `Grid parameters auto-filled using ${data.modelTier}` });
+      toast({ title: "Analisis AI Selesai", description: `Parameter grid diisi otomatis menggunakan ${data.modelTier}` });
     } catch (err: any) {
-      toast({ title: "AI Analysis Failed", description: err.message, variant: "destructive" });
+      toast({ title: "Analisis AI Gagal", description: err.message, variant: "destructive" });
     } finally {
       setAiLoading(false);
     }
@@ -457,8 +457,8 @@ function GridForm({ markets, onSuccess, onCancel }: GridFormProps) {
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4 space-y-4">
       <div className="space-y-2">
-        <Label>Strategy Name</Label>
-        <Input {...form.register("name")} placeholder="e.g. BTC Grid Neutral" className="bg-background" />
+        <Label>Nama Strategi</Label>
+        <Input {...form.register("name")} placeholder="mis. BTC Grid Netral" className="bg-background" />
         {form.formState.errors.name && <p className="text-xs text-destructive">{form.formState.errors.name.message}</p>}
       </div>
 
@@ -477,19 +477,19 @@ function GridForm({ markets, onSuccess, onCancel }: GridFormProps) {
         disabled={aiLoading}
       >
         {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-        {aiLoading ? "Analyzing market for grid setup..." : "AI Auto-Fill Grid Parameters"}
+        {aiLoading ? "Menganalisis pasar untuk setup grid..." : "Isi Otomatis Parameter Grid (AI)"}
       </Button>
 
       {aiResult && <AIInsightCard result={aiResult} />}
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Lower Price</Label>
+          <Label>Harga Bawah</Label>
           <Input type="text" inputMode="decimal" {...form.register("lowerPrice")} placeholder="1800" className="bg-background font-mono" />
           {form.formState.errors.lowerPrice && <p className="text-xs text-destructive">{form.formState.errors.lowerPrice.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label>Upper Price</Label>
+          <Label>Harga Atas</Label>
           <Input type="text" inputMode="decimal" {...form.register("upperPrice")} placeholder="2200" className="bg-background font-mono" />
           {form.formState.errors.upperPrice && <p className="text-xs text-destructive">{form.formState.errors.upperPrice.message}</p>}
         </div>
@@ -497,12 +497,12 @@ function GridForm({ markets, onSuccess, onCancel }: GridFormProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Grid Levels</Label>
+          <Label>Level Grid</Label>
           <Input type="text" inputMode="numeric" {...form.register("gridLevels")} placeholder="10" className="bg-background font-mono" />
           {form.formState.errors.gridLevels && <p className="text-xs text-destructive">{form.formState.errors.gridLevels.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label>Amount per Grid (USDC)</Label>
+          <Label>Jumlah per Grid (USDC)</Label>
           <Input type="text" inputMode="decimal" {...form.register("amountPerGrid")} placeholder="50" className="bg-background font-mono" />
           {form.formState.errors.amountPerGrid && <p className="text-xs text-destructive">{form.formState.errors.amountPerGrid.message}</p>}
         </div>
@@ -514,14 +514,14 @@ function GridForm({ markets, onSuccess, onCancel }: GridFormProps) {
           <Select onValueChange={(v: any) => form.setValue("mode", v)} value={form.watch("mode") || "neutral"}>
             <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="neutral">Neutral (Both)</SelectItem>
-              <SelectItem value="long">Long (Buy only)</SelectItem>
-              <SelectItem value="short">Short (Sell only)</SelectItem>
+              <SelectItem value="neutral">Netral (Keduanya)</SelectItem>
+              <SelectItem value="long">Long (Beli saja)</SelectItem>
+              <SelectItem value="short">Short (Jual saja)</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-2">
-          <Label>Order Type</Label>
+          <Label>Tipe Order</Label>
           <Select onValueChange={(v: any) => form.setValue("orderType", v)} value={form.watch("orderType") || "post_only"}>
             <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -551,22 +551,22 @@ function GridForm({ markets, onSuccess, onCancel }: GridFormProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Stop Loss <span className="text-xs text-muted-foreground">(optional)</span></Label>
-          <Input type="text" inputMode="decimal" {...form.register("stopLoss")} placeholder="e.g. 1700" className="bg-background font-mono" />
-          <p className="text-xs text-muted-foreground">Bot stops if price drops below this</p>
+          <Label>Stop Loss <span className="text-xs text-muted-foreground">(opsional)</span></Label>
+          <Input type="text" inputMode="decimal" {...form.register("stopLoss")} placeholder="mis. 1700" className="bg-background font-mono" />
+          <p className="text-xs text-muted-foreground">Bot berhenti jika harga turun di bawah ini</p>
         </div>
         <div className="space-y-2">
-          <Label>Take Profit <span className="text-xs text-muted-foreground">(optional)</span></Label>
-          <Input type="text" inputMode="decimal" {...form.register("takeProfit")} placeholder="e.g. 2500" className="bg-background font-mono" />
-          <p className="text-xs text-muted-foreground">Bot stops if price rises above this</p>
+          <Label>Take Profit <span className="text-xs text-muted-foreground">(opsional)</span></Label>
+          <Input type="text" inputMode="decimal" {...form.register("takeProfit")} placeholder="mis. 2500" className="bg-background font-mono" />
+          <p className="text-xs text-muted-foreground">Bot berhenti jika harga naik di atas ini</p>
         </div>
       </div>
 
       <div className="pt-4 flex justify-end gap-3 border-t border-border">
-        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+        <Button type="button" variant="outline" onClick={onCancel}>Batal</Button>
         <Button type="submit" disabled={createMutation.isPending}>
           {createMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          Create Bot
+          Buat Bot
         </Button>
       </div>
     </form>
@@ -589,12 +589,12 @@ export function CreateStrategyModal() {
       <DialogTrigger asChild>
         <Button className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_20px_rgba(var(--primary),0.3)]">
           <Plus className="w-4 h-4 mr-2" />
-          New Strategy
+          Strategi Baru
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[520px] max-h-[90vh] overflow-y-auto bg-card border-border shadow-2xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Create Trading Bot</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">Buat Trading Bot</DialogTitle>
         </DialogHeader>
 
         <Tabs value={tab} onValueChange={(v: any) => setTab(v)} className="mt-2">

@@ -45,7 +45,7 @@ function PnlChartDialog({ strategyId, strategyName, open, onClose }: {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <LineChart className="w-5 h-5 text-primary" />
-            PnL Chart — {strategyName}
+            Grafik PnL — {strategyName}
           </DialogTitle>
         </DialogHeader>
         <div className="pt-2">
@@ -54,7 +54,7 @@ function PnlChartDialog({ strategyId, strategyName, open, onClose }: {
           ) : !hasData ? (
             <div className="h-64 flex flex-col items-center justify-center text-muted-foreground">
               <BarChart2 className="w-12 h-12 mb-3 opacity-20" />
-              <p>No trade data yet. Start the bot to begin tracking PnL.</p>
+              <p>Belum ada data trade. Mulai bot untuk mulai melacak PnL.</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -63,19 +63,19 @@ function PnlChartDialog({ strategyId, strategyName, open, onClose }: {
                   <p className="text-2xl font-bold font-mono text-success">
                     {chartData.reduce((a, d) => a + d.buys, 0)}
                   </p>
-                  <p className="text-xs text-muted-foreground">Total Buys</p>
+                  <p className="text-xs text-muted-foreground">Total Beli</p>
                 </div>
                 <div className="bg-background rounded-lg p-3 border border-border/50">
                   <p className="text-2xl font-bold font-mono text-destructive">
                     {chartData.reduce((a, d) => a + d.sells, 0)}
                   </p>
-                  <p className="text-xs text-muted-foreground">Total Sells</p>
+                  <p className="text-xs text-muted-foreground">Total Jual</p>
                 </div>
                 <div className="bg-background rounded-lg p-3 border border-border/50">
                   <p className={`text-2xl font-bold font-mono ${(chartData[chartData.length - 1]?.cumulativePnl ?? 0) >= 0 ? "text-success" : "text-destructive"}`}>
                     ${(chartData[chartData.length - 1]?.cumulativePnl ?? 0).toFixed(4)}
                   </p>
-                  <p className="text-xs text-muted-foreground">Cumulative PnL</p>
+                  <p className="text-xs text-muted-foreground">PnL Kumulatif</p>
                 </div>
               </div>
               <ResponsiveContainer width="100%" height={260}>
@@ -88,8 +88,8 @@ function PnlChartDialog({ strategyId, strategyName, open, onClose }: {
                     formatter={(v: number, name: string) => [`$${v.toFixed(4)}`, name]}
                   />
                   <Legend />
-                  <Line type="monotone" dataKey="estimatedPnl" stroke="#10b981" strokeWidth={2} dot={false} name="Daily PnL" />
-                  <Line type="monotone" dataKey="cumulativePnl" stroke="#6366f1" strokeWidth={2} dot={false} name="Cumulative PnL" />
+                  <Line type="monotone" dataKey="estimatedPnl" stroke="#10b981" strokeWidth={2} dot={false} name="PnL Harian" />
+                  <Line type="monotone" dataKey="cumulativePnl" stroke="#6366f1" strokeWidth={2} dot={false} name="PnL Kumulatif" />
                 </ReLineChart>
               </ResponsiveContainer>
             </div>
@@ -110,7 +110,7 @@ export default function Strategies() {
   const startMutation = useStartBot({
     mutation: {
       onSuccess: () => {
-        toast({ title: "Bot Started", description: "Strategy is now running." });
+        toast({ title: "Bot Dimulai", description: "Strategi sedang berjalan." });
         queryClient.invalidateQueries({ queryKey: getGetStrategiesQueryKey() });
       },
       onError: (err: any) => {
@@ -124,7 +124,7 @@ export default function Strategies() {
   const stopMutation = useStopBot({
     mutation: {
       onSuccess: () => {
-        toast({ title: "Bot Stopped", description: "Strategy has been paused." });
+        toast({ title: "Bot Dihentikan", description: "Strategi telah dijeda." });
         queryClient.invalidateQueries({ queryKey: getGetStrategiesQueryKey() });
       }
     }
@@ -133,7 +133,7 @@ export default function Strategies() {
   const deleteMutation = useDeleteStrategy({
     mutation: {
       onSuccess: () => {
-        toast({ title: "Strategy Deleted" });
+        toast({ title: "Strategi Dihapus" });
         queryClient.invalidateQueries({ queryKey: getGetStrategiesQueryKey() });
       }
     }
@@ -148,7 +148,7 @@ export default function Strategies() {
   };
 
   const handleDelete = (strategyId: number) => {
-    if (confirm("Are you sure you want to delete this strategy?")) {
+    if (confirm("Yakin ingin menghapus strategi ini?")) {
       deleteMutation.mutate({ id: strategyId });
     }
   };
@@ -159,9 +159,9 @@ export default function Strategies() {
         <div>
           <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
             <Settings2 className="w-8 h-8 text-primary" />
-            Strategies
+            Strategi
           </h1>
-          <p className="text-muted-foreground mt-1">Manage your automated trading bots</p>
+          <p className="text-muted-foreground mt-1">Kelola bot trading otomatis kamu</p>
         </div>
         <CreateStrategyModal />
       </header>
@@ -199,9 +199,9 @@ export default function Strategies() {
       ) : !data?.strategies.length ? (
         <div className="text-center py-20 bg-card rounded-2xl border border-border flex flex-col items-center">
           <Bot className="w-16 h-16 text-muted-foreground mb-4 opacity-20" />
-          <h3 className="text-xl font-bold text-foreground">No Strategies Found</h3>
+          <h3 className="text-xl font-bold text-foreground">Belum Ada Strategi</h3>
           <p className="text-muted-foreground mt-2 max-w-md mx-auto">
-            You haven't created any trading bots yet. Click "New Strategy" to set up your first DCA or Grid bot.
+            Kamu belum membuat bot trading. Klik "Strategi Baru" untuk membuat DCA atau Grid bot pertama kamu.
           </p>
         </div>
       ) : (
@@ -231,7 +231,7 @@ export default function Strategies() {
                     strategy.isRunning ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'
                   }`}>
                     {strategy.isRunning && <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />}
-                    {strategy.isRunning ? 'Running' : 'Stopped'}
+                    {strategy.isRunning ? 'Berjalan' : 'Berhenti'}
                   </div>
                 </div>
               </CardHeader>
@@ -240,7 +240,7 @@ export default function Strategies() {
                 {strategy.type === 'dca' && strategy.dcaConfig && (
                   <div className="grid grid-cols-2 gap-y-3 text-sm">
                     <div>
-                      <div className="text-muted-foreground text-xs">Amount</div>
+                      <div className="text-muted-foreground text-xs">Jumlah</div>
                       <div className="font-mono">${strategy.dcaConfig.amountPerOrder}</div>
                     </div>
                     <div>
@@ -248,7 +248,7 @@ export default function Strategies() {
                       <div className="font-mono">{strategy.dcaConfig.intervalMinutes}m</div>
                     </div>
                     <div>
-                      <div className="text-muted-foreground text-xs">Side</div>
+                      <div className="text-muted-foreground text-xs">Sisi</div>
                       <div className={`font-medium ${strategy.dcaConfig.side === 'buy' ? 'text-success' : 'text-destructive'}`}>
                         {strategy.dcaConfig.side.toUpperCase()}
                       </div>
@@ -259,11 +259,11 @@ export default function Strategies() {
                 {strategy.type === 'grid' && strategy.gridConfig && (
                   <div className="grid grid-cols-2 gap-y-3 text-sm">
                     <div>
-                      <div className="text-muted-foreground text-xs">Range</div>
+                      <div className="text-muted-foreground text-xs">Rentang</div>
                       <div className="font-mono text-xs">${strategy.gridConfig.lowerPrice} - ${strategy.gridConfig.upperPrice}</div>
                     </div>
                     <div>
-                      <div className="text-muted-foreground text-xs">Levels</div>
+                      <div className="text-muted-foreground text-xs">Level</div>
                       <div className="font-mono">{strategy.gridConfig.gridLevels}</div>
                     </div>
                     <div>
@@ -292,11 +292,11 @@ export default function Strategies() {
                 {strategy.stats && (
                   <div className="mt-4 pt-4 border-t border-border/50">
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-xs text-muted-foreground flex items-center gap-1"><BarChart2 className="w-3 h-3" /> Realized PnL</span>
+                      <span className="text-xs text-muted-foreground flex items-center gap-1"><BarChart2 className="w-3 h-3" /> PnL Terealisasi</span>
                       <PriceDisplay value={strategy.stats.realizedPnl} format="currency" showIcon />
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      Trades: {strategy.stats.successfulOrders} / {strategy.stats.totalOrders}
+                      Trade: {strategy.stats.successfulOrders} / {strategy.stats.totalOrders}
                     </div>
                   </div>
                 )}
@@ -309,13 +309,13 @@ export default function Strategies() {
                   onClick={() => handleToggle(strategy.id, strategy.isRunning)}
                   disabled={startMutation.isPending || stopMutation.isPending}
                 >
-                  {strategy.isRunning ? <><Square className="w-4 h-4 mr-2 fill-current" /> Stop Bot</> : <><Play className="w-4 h-4 mr-2 fill-current" /> Start Bot</>}
+                  {strategy.isRunning ? <><Square className="w-4 h-4 mr-2 fill-current" /> Hentikan Bot</> : <><Play className="w-4 h-4 mr-2 fill-current" /> Mulai Bot</>}
                 </Button>
                 <Button
                   variant="outline"
                   size="icon"
                   className="shrink-0 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
-                  title="View PnL Chart"
+                  title="Lihat Grafik PnL"
                   onClick={() => setChartStrategy({ id: strategy.id, name: strategy.name })}
                 >
                   <Activity className="w-4 h-4" />
@@ -324,7 +324,7 @@ export default function Strategies() {
                   variant="outline"
                   size="icon"
                   className="shrink-0 hover:bg-blue-500/10 hover:text-blue-400 hover:border-blue-500/30"
-                  title="Edit Strategy"
+                  title="Edit Strategi"
                   onClick={() => setEditStrategy(strategy)}
                 >
                   <Pencil className="w-4 h-4" />

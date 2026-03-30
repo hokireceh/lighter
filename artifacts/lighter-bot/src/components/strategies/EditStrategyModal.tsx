@@ -15,9 +15,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 
 const dcaEditSchema = z.object({
-  name: z.string().min(3, "Name must be at least 3 characters"),
-  amountPerOrder: z.coerce.number().positive("Amount must be positive"),
-  intervalMinutes: z.coerce.number().min(1, "Interval must be at least 1 minute"),
+  name: z.string().min(3, "Nama minimal 3 karakter"),
+  amountPerOrder: z.coerce.number().positive("Jumlah harus positif"),
+  intervalMinutes: z.coerce.number().min(1, "Interval minimal 1 menit"),
   side: z.enum(["buy", "sell"]),
   orderType: z.enum(["market", "limit", "post_only"]),
   limitPriceOffset: z.coerce.number().min(0).optional(),
@@ -33,24 +33,24 @@ const optionalPositiveNumber = z.preprocess(
 );
 
 const gridEditSchema = z.object({
-  name: z.string().min(3, "Name must be at least 3 characters"),
-  lowerPrice: z.coerce.number().positive("Lower price must be positive"),
-  upperPrice: z.coerce.number().positive("Upper price must be positive"),
+  name: z.string().min(3, "Nama minimal 3 karakter"),
+  lowerPrice: z.coerce.number().positive("Harga bawah harus positif"),
+  upperPrice: z.coerce.number().positive("Harga atas harus positif"),
   gridLevels: z.coerce.number().min(2).max(100),
-  amountPerGrid: z.coerce.number().positive("Amount must be positive"),
+  amountPerGrid: z.coerce.number().positive("Jumlah harus positif"),
   mode: z.enum(["neutral", "long", "short"]),
   orderType: z.enum(["market", "limit", "post_only"]),
   limitPriceOffset: z.coerce.number().min(0).optional(),
   stopLoss: optionalPositiveNumber,
   takeProfit: optionalPositiveNumber,
 }).refine(data => data.upperPrice > data.lowerPrice, {
-  message: "Upper price must be greater than lower price",
+  message: "Harga atas harus lebih besar dari harga bawah",
   path: ["upperPrice"],
 }).refine(data => !data.stopLoss || data.stopLoss < data.lowerPrice, {
-  message: "Stop Loss must be below Lower Price (otherwise bot stops immediately)",
+  message: "Stop Loss harus di bawah Harga Bawah (agar bot tidak langsung berhenti)",
   path: ["stopLoss"],
 }).refine(data => !data.takeProfit || data.takeProfit > data.upperPrice, {
-  message: "Take Profit must be above Upper Price (otherwise bot stops immediately)",
+  message: "Take Profit harus di atas Harga Atas (agar bot tidak langsung berhenti)",
   path: ["takeProfit"],
 });
 
@@ -101,7 +101,7 @@ function AIInsightCard({ result }: { result: AIResult }) {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-1.5 text-xs font-medium text-primary">
           <Sparkles className="w-3.5 h-3.5" />
-          AI Analysis — {result.modelTier}
+          Analisis AI — {result.modelTier}
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -109,9 +109,9 @@ function AIInsightCard({ result }: { result: AIResult }) {
             <span className="capitalize">{result.marketCondition}</span>
           </div>
           <Badge variant="outline" className={cn("text-xs px-1.5 py-0", riskColor)}>
-            {result.riskLevel} risk
+            {result.riskLevel === "low" ? "risiko rendah" : result.riskLevel === "medium" ? "risiko sedang" : "risiko tinggi"}
           </Badge>
-          <span className="text-xs text-muted-foreground">{result.confidence}% confidence</span>
+          <span className="text-xs text-muted-foreground">{result.confidence}% keyakinan</span>
         </div>
       </div>
       <p className="text-xs text-muted-foreground leading-relaxed">{result.reasoning}</p>
@@ -158,12 +158,12 @@ function DcaEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =>
   const updateMutation = useUpdateStrategy({
     mutation: {
       onSuccess: () => {
-        toast({ title: "Strategy Updated", description: "Changes saved successfully." });
+        toast({ title: "Strategi Diperbarui", description: "Perubahan berhasil disimpan." });
         queryClient.invalidateQueries({ queryKey: getGetStrategiesQueryKey() });
         onClose();
       },
       onError: (err: any) => {
-        toast({ title: "Error", description: err.message || "Failed to update strategy", variant: "destructive" });
+        toast({ title: "Kesalahan", description: err.message || "Gagal memperbarui strategi", variant: "destructive" });
       },
     },
   });
@@ -171,7 +171,7 @@ function DcaEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =>
   const handleAIAnalyze = async () => {
     const marketIndex = strategy.marketIndex;
     if (marketIndex === undefined || marketIndex === null) {
-      toast({ title: "Market index not available", variant: "destructive" });
+      toast({ title: "Indeks pasar tidak tersedia", variant: "destructive" });
       return;
     }
     setAiLoading(true);
@@ -179,16 +179,16 @@ function DcaEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =>
     try {
       const data = await fetchAIAnalysis("dca", marketIndex);
       const rec = data.dca_params;
-      if (!rec) throw new Error("AI did not return DCA parameters");
+      if (!rec) throw new Error("AI tidak mengembalikan parameter DCA");
       if (rec.amountPerOrder) form.setValue("amountPerOrder", rec.amountPerOrder);
       if (rec.intervalMinutes) form.setValue("intervalMinutes", rec.intervalMinutes);
       if (rec.side) form.setValue("side", rec.side);
       if (rec.orderType) form.setValue("orderType", rec.orderType);
       if (rec.limitPriceOffset !== undefined) form.setValue("limitPriceOffset", rec.limitPriceOffset);
       setAiResult({ reasoning: data.reasoning, marketCondition: data.marketCondition, riskLevel: data.riskLevel, confidence: data.confidence, modelUsed: data.modelUsed, modelTier: data.modelTier });
-      toast({ title: "AI Analysis Complete", description: `Parameters updated using ${data.modelTier}` });
+      toast({ title: "Analisis AI Selesai", description: `Parameter diperbarui menggunakan ${data.modelTier}` });
     } catch (err: any) {
-      toast({ title: "AI Analysis Failed", description: err.message, variant: "destructive" });
+      toast({ title: "Analisis AI Gagal", description: err.message, variant: "destructive" });
     } finally {
       setAiLoading(false);
     }
@@ -213,7 +213,7 @@ function DcaEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =>
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-2">
       <div className="space-y-2">
-        <Label>Strategy Name</Label>
+        <Label>Nama Strategi</Label>
         <Input {...form.register("name")} className="bg-background" />
         {form.formState.errors.name && <p className="text-xs text-destructive">{form.formState.errors.name.message}</p>}
       </div>
@@ -226,19 +226,19 @@ function DcaEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =>
         disabled={aiLoading}
       >
         {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-        {aiLoading ? "Analyzing market..." : "AI Re-Analyze & Update Parameters"}
+        {aiLoading ? "Menganalisis pasar..." : "Analisis Ulang AI & Perbarui Parameter"}
       </Button>
 
       {aiResult && <AIInsightCard result={aiResult} />}
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Amount (USDC)</Label>
+          <Label>Jumlah (USDC)</Label>
           <Input type="text" inputMode="decimal" {...form.register("amountPerOrder")} className="bg-background font-mono" />
           {form.formState.errors.amountPerOrder && <p className="text-xs text-destructive">{form.formState.errors.amountPerOrder.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label>Interval (Minutes)</Label>
+          <Label>Interval (Menit)</Label>
           <Input type="text" inputMode="numeric" {...form.register("intervalMinutes")} className="bg-background font-mono" />
           {form.formState.errors.intervalMinutes && <p className="text-xs text-destructive">{form.formState.errors.intervalMinutes.message}</p>}
         </div>
@@ -246,7 +246,7 @@ function DcaEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Side</Label>
+          <Label>Sisi</Label>
           <Select value={watchSide} onValueChange={(v: any) => form.setValue("side", v)}>
             <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -256,7 +256,7 @@ function DcaEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =>
           </Select>
         </div>
         <div className="space-y-2">
-          <Label>Order Type</Label>
+          <Label>Tipe Order</Label>
           <Select value={watchOrderType} onValueChange={(v: any) => form.setValue("orderType", v)}>
             <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -272,20 +272,20 @@ function DcaEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =>
         <div className="space-y-2">
           <Label>
             Limit Price Offset (USDC)
-            <span className="ml-1.5 text-xs text-muted-foreground">— offset from market price</span>
+            <span className="ml-1.5 text-xs text-muted-foreground">— offset dari harga pasar</span>
           </Label>
           <Input type="text" inputMode="decimal" {...form.register("limitPriceOffset")} className="bg-background font-mono" />
           <p className="text-xs text-muted-foreground">
-            Buy: places order <strong>below</strong> market price. Sell: places <strong>above</strong>.
+            Beli: order di <strong>bawah</strong> harga pasar. Jual: di <strong>atas</strong>.
           </p>
         </div>
       )}
 
       <div className="pt-4 flex justify-end gap-3 border-t border-border">
-        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+        <Button type="button" variant="outline" onClick={onClose}>Batal</Button>
         <Button type="submit" disabled={updateMutation.isPending}>
           {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          Save Changes
+          Simpan Perubahan
         </Button>
       </div>
     </form>
@@ -321,12 +321,12 @@ function GridEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =
   const updateMutation = useUpdateStrategy({
     mutation: {
       onSuccess: () => {
-        toast({ title: "Strategy Updated", description: "Changes saved successfully." });
+        toast({ title: "Strategi Diperbarui", description: "Perubahan berhasil disimpan." });
         queryClient.invalidateQueries({ queryKey: getGetStrategiesQueryKey() });
         onClose();
       },
       onError: (err: any) => {
-        toast({ title: "Error", description: err.message || "Failed to update strategy", variant: "destructive" });
+        toast({ title: "Kesalahan", description: err.message || "Gagal memperbarui strategi", variant: "destructive" });
       },
     },
   });
@@ -334,7 +334,7 @@ function GridEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =
   const handleAIAnalyze = async () => {
     const marketIndex = strategy.marketIndex;
     if (marketIndex === undefined || marketIndex === null) {
-      toast({ title: "Market index not available", variant: "destructive" });
+      toast({ title: "Indeks pasar tidak tersedia", variant: "destructive" });
       return;
     }
     setAiLoading(true);
@@ -342,7 +342,7 @@ function GridEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =
     try {
       const data = await fetchAIAnalysis("grid", marketIndex);
       const rec = data.grid_params;
-      if (!rec) throw new Error("AI did not return Grid parameters");
+      if (!rec) throw new Error("AI tidak mengembalikan parameter Grid");
       if (rec.lowerPrice) form.setValue("lowerPrice", rec.lowerPrice);
       if (rec.upperPrice) form.setValue("upperPrice", rec.upperPrice);
       if (rec.gridLevels) form.setValue("gridLevels", rec.gridLevels);
@@ -353,9 +353,9 @@ function GridEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =
       if (rec.stopLoss) form.setValue("stopLoss", rec.stopLoss);
       if (rec.takeProfit) form.setValue("takeProfit", rec.takeProfit);
       setAiResult({ reasoning: data.reasoning, marketCondition: data.marketCondition, riskLevel: data.riskLevel, confidence: data.confidence, modelUsed: data.modelUsed, modelTier: data.modelTier });
-      toast({ title: "AI Analysis Complete", description: `Grid parameters updated using ${data.modelTier}` });
+      toast({ title: "Analisis AI Selesai", description: `Parameter grid diperbarui menggunakan ${data.modelTier}` });
     } catch (err: any) {
-      toast({ title: "AI Analysis Failed", description: err.message, variant: "destructive" });
+      toast({ title: "Analisis AI Gagal", description: err.message, variant: "destructive" });
     } finally {
       setAiLoading(false);
     }
@@ -384,7 +384,7 @@ function GridEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-2">
       <div className="space-y-2">
-        <Label>Strategy Name</Label>
+        <Label>Nama Strategi</Label>
         <Input {...form.register("name")} className="bg-background" />
         {form.formState.errors.name && <p className="text-xs text-destructive">{form.formState.errors.name.message}</p>}
       </div>
@@ -397,19 +397,19 @@ function GridEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =
         disabled={aiLoading}
       >
         {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-        {aiLoading ? "Analyzing market for grid setup..." : "AI Re-Analyze & Update Grid Parameters"}
+        {aiLoading ? "Menganalisis pasar untuk setup grid..." : "Analisis Ulang AI & Perbarui Parameter Grid"}
       </Button>
 
       {aiResult && <AIInsightCard result={aiResult} />}
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Lower Price</Label>
+          <Label>Harga Bawah</Label>
           <Input type="text" inputMode="decimal" {...form.register("lowerPrice")} className="bg-background font-mono" />
           {form.formState.errors.lowerPrice && <p className="text-xs text-destructive">{form.formState.errors.lowerPrice.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label>Upper Price</Label>
+          <Label>Harga Atas</Label>
           <Input type="text" inputMode="decimal" {...form.register("upperPrice")} className="bg-background font-mono" />
           {form.formState.errors.upperPrice && <p className="text-xs text-destructive">{form.formState.errors.upperPrice.message}</p>}
         </div>
@@ -417,12 +417,12 @@ function GridEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Grid Levels</Label>
+          <Label>Level Grid</Label>
           <Input type="text" inputMode="numeric" {...form.register("gridLevels")} className="bg-background font-mono" />
           {form.formState.errors.gridLevels && <p className="text-xs text-destructive">{form.formState.errors.gridLevels.message}</p>}
         </div>
         <div className="space-y-2">
-          <Label>Amount per Grid (USDC)</Label>
+          <Label>Jumlah per Grid (USDC)</Label>
           <Input type="text" inputMode="decimal" {...form.register("amountPerGrid")} className="bg-background font-mono" />
           {form.formState.errors.amountPerGrid && <p className="text-xs text-destructive">{form.formState.errors.amountPerGrid.message}</p>}
         </div>
@@ -434,14 +434,14 @@ function GridEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =
           <Select value={watchMode} onValueChange={(v: any) => form.setValue("mode", v)}>
             <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="neutral">Neutral (Both)</SelectItem>
-              <SelectItem value="long">Long (Buy only)</SelectItem>
-              <SelectItem value="short">Short (Sell only)</SelectItem>
+              <SelectItem value="neutral">Netral (Keduanya)</SelectItem>
+              <SelectItem value="long">Long (Beli saja)</SelectItem>
+              <SelectItem value="short">Short (Jual saja)</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-2">
-          <Label>Order Type</Label>
+          <Label>Tipe Order</Label>
           <Select value={watchOrderType} onValueChange={(v: any) => form.setValue("orderType", v)}>
             <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -471,22 +471,22 @@ function GridEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Stop Loss <span className="text-xs text-muted-foreground">(optional)</span></Label>
-          <Input type="text" inputMode="decimal" {...form.register("stopLoss")} placeholder="e.g. 1700" className="bg-background font-mono" />
-          <p className="text-xs text-muted-foreground">Bot stops if price drops below this</p>
+          <Label>Stop Loss <span className="text-xs text-muted-foreground">(opsional)</span></Label>
+          <Input type="text" inputMode="decimal" {...form.register("stopLoss")} placeholder="mis. 1700" className="bg-background font-mono" />
+          <p className="text-xs text-muted-foreground">Bot berhenti jika harga turun di bawah ini</p>
         </div>
         <div className="space-y-2">
-          <Label>Take Profit <span className="text-xs text-muted-foreground">(optional)</span></Label>
-          <Input type="text" inputMode="decimal" {...form.register("takeProfit")} placeholder="e.g. 2500" className="bg-background font-mono" />
-          <p className="text-xs text-muted-foreground">Bot stops if price rises above this</p>
+          <Label>Take Profit <span className="text-xs text-muted-foreground">(opsional)</span></Label>
+          <Input type="text" inputMode="decimal" {...form.register("takeProfit")} placeholder="mis. 2500" className="bg-background font-mono" />
+          <p className="text-xs text-muted-foreground">Bot berhenti jika harga naik di atas ini</p>
         </div>
       </div>
 
       <div className="pt-4 flex justify-end gap-3 border-t border-border">
-        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+        <Button type="button" variant="outline" onClick={onClose}>Batal</Button>
         <Button type="submit" disabled={updateMutation.isPending}>
           {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          Save Changes
+          Simpan Perubahan
         </Button>
       </div>
     </form>
@@ -499,7 +499,7 @@ export function EditStrategyModal({ strategy, onClose }: EditStrategyModalProps)
       <DialogContent className="sm:max-w-[520px] max-h-[90vh] overflow-y-auto bg-card border-border shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
-            Edit Strategy
+            Edit Strategi
             {strategy && (
               <span className="ml-2 text-sm font-normal text-muted-foreground">
                 — {strategy.marketSymbol} {strategy.type.toUpperCase()}

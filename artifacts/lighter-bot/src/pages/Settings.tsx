@@ -39,10 +39,10 @@ export default function Settings() {
   const updateMutation = useUpdateBotConfig({
     mutation: {
       onSuccess: () => {
-        toast({ title: "Settings Saved", description: "Your configuration has been updated." });
+        toast({ title: "Pengaturan Disimpan", description: "Konfigurasi kamu telah diperbarui." });
       },
       onError: (err: any) => {
-        toast({ title: "Error", description: err.message || "Failed to save settings", variant: "destructive" });
+        toast({ title: "Error", description: err.message || "Gagal menyimpan pengaturan", variant: "destructive" });
       }
     }
   });
@@ -94,7 +94,7 @@ export default function Settings() {
   const handleLookupAccount = async () => {
     const l1Address = form.getValues("l1Address");
     if (!l1Address || !l1Address.startsWith("0x")) {
-      toast({ title: "Invalid Address", description: "Enter a valid L1 address starting with 0x", variant: "destructive" });
+      toast({ title: "Alamat Tidak Valid", description: "Masukkan L1 address yang valid, diawali 0x", variant: "destructive" });
       return;
     }
     setIsLookingUp(true);
@@ -105,17 +105,17 @@ export default function Settings() {
       });
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || "Account not found");
+        throw new Error(err.error || "Akun tidak ditemukan");
       }
       const data = await res.json();
       form.setValue("accountIndex", data.accountIndex);
       setDetectedBalance(data.availableBalance);
       toast({
-        title: "Account Found",
-        description: `Account Index: ${data.accountIndex} | Balance: ${parseFloat(data.availableBalance).toFixed(2)} USDC`,
+        title: "Akun Ditemukan",
+        description: `Account Index: ${data.accountIndex} | Saldo: ${parseFloat(data.availableBalance).toFixed(2)} USDC`,
       });
     } catch (err: any) {
-      toast({ title: "Lookup Failed", description: err.message, variant: "destructive" });
+      toast({ title: "Pencarian Gagal", description: err.message, variant: "destructive" });
     } finally {
       setIsLookingUp(false);
     }
@@ -146,9 +146,9 @@ export default function Settings() {
       <header>
         <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
           <SettingsIcon className="w-8 h-8 text-primary" />
-          Settings
+          Pengaturan
         </h1>
-        <p className="text-muted-foreground mt-1">Configure Lighter.xyz API keys and network preferences</p>
+        <p className="text-muted-foreground mt-1">Konfigurasi API key Lighter.xyz dan preferensi jaringan</p>
       </header>
 
       {isLoading ? (
@@ -176,10 +176,10 @@ export default function Settings() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <KeyRound className="w-5 h-5 text-primary" />
-                API Credentials
+                Kredensial API
               </CardTitle>
               <CardDescription>
-                Obtain these from the Lighter.xyz interface. Required to sign transactions.
+                Dapatkan dari antarmuka Lighter.xyz. Diperlukan untuk menandatangani transaksi.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -188,14 +188,14 @@ export default function Settings() {
                 <div className="bg-success/10 border border-success/30 text-success px-4 py-3 rounded-lg flex items-center gap-3 text-sm">
                   <ShieldAlert className="w-5 h-5" />
                   <div>
-                    <strong>Secure Vault:</strong> A private key is currently configured and stored securely. You only need to enter it below if you want to change it.
+                    <strong>Brankas Aman:</strong> Private key sudah dikonfigurasi dan tersimpan dengan aman. Isi ulang hanya jika ingin menggantinya.
                   </div>
                 </div>
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label>Network Environment</Label>
+                  <Label>Jaringan</Label>
                   <Select value={form.watch("network")} onValueChange={(v: any) => form.setValue("network", v)}>
                     <SelectTrigger className="bg-background">
                       <SelectValue />
@@ -218,22 +218,22 @@ export default function Settings() {
                       onClick={handleLookupAccount}
                       disabled={isLookingUp}
                       className="shrink-0 px-3"
-                      title="Auto-detect Account Index from L1 Address"
+                      title="Deteksi otomatis Account Index dari L1 Address"
                     >
                       <Search className="w-4 h-4" />
                     </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground">Click the search icon to auto-detect your Account Index.</p>
+                  <p className="text-xs text-muted-foreground">Klik ikon cari untuk deteksi otomatis Account Index kamu.</p>
                 </div>
 
                 <div className="space-y-2">
                   <Label>Account Index</Label>
                   <div className="relative">
-                    <Input type="number" {...form.register("accountIndex")} placeholder="e.g. 720746" className="bg-background font-mono" />
+                    <Input type="number" {...form.register("accountIndex")} placeholder="mis. 720746" className="bg-background font-mono" />
                     {detectedBalance !== null && (
                       <div className="flex items-center gap-1 text-xs text-success mt-1">
                         <CheckCircle2 className="w-3 h-3" />
-                        Detected — Balance: {parseFloat(detectedBalance).toFixed(4)} USDC
+                        Terdeteksi — Saldo: {parseFloat(detectedBalance).toFixed(4)} USDC
                       </div>
                     )}
                   </div>
@@ -241,7 +241,7 @@ export default function Settings() {
 
                 <div className="space-y-2">
                   <Label>API Key Index</Label>
-                  <Input type="number" {...form.register("apiKeyIndex")} placeholder="e.g. 7" className="bg-background font-mono" />
+                  <Input type="number" {...form.register("apiKeyIndex")} placeholder="mis. 7" className="bg-background font-mono" />
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
@@ -249,10 +249,10 @@ export default function Settings() {
                   <Input 
                     type="password" 
                     {...form.register("privateKey")} 
-                    placeholder={config?.hasPrivateKey ? "••••••••••••••••••••••••••••••••" : "Enter private key..."} 
+                    placeholder={config?.hasPrivateKey ? "••••••••••••••••••••••••••••••••" : "Masukkan private key..."} 
                     className="bg-background font-mono" 
                   />
-                  <p className="text-xs text-muted-foreground">Keep this secure. It is required to sign orders on Lighter.</p>
+                  <p className="text-xs text-muted-foreground">Jaga kerahasiaannya. Diperlukan untuk menandatangani order di Lighter.</p>
                 </div>
               </div>
             </CardContent>
@@ -262,10 +262,10 @@ export default function Settings() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="w-5 h-5 text-primary" />
-                Telegram Notifications
+                Notifikasi Telegram
               </CardTitle>
               <CardDescription>
-                Configure your Telegram bot to receive trade alerts directly in Telegram.
+                Konfigurasi bot Telegram untuk menerima notifikasi trade langsung di Telegram.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
@@ -281,8 +281,8 @@ export default function Settings() {
                     className="bg-background font-mono text-xs"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Get from <span className="text-primary">@BotFather</span> → /newbot
-                    {config?.hasNotifyBotToken && <span className="text-success ml-2">✓ Configured</span>}
+                    Dapatkan dari <span className="text-primary">@BotFather</span> → /newbot
+                    {config?.hasNotifyBotToken && <span className="text-success ml-2">✓ Terkonfigurasi</span>}
                   </p>
                 </div>
                 <div className="space-y-2">
@@ -291,22 +291,22 @@ export default function Settings() {
                   </Label>
                   <Input
                     {...form.register("notifyChatId")}
-                    placeholder="e.g. 123456789"
+                    placeholder="mis. 123456789"
                     className="bg-background font-mono"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Get from <span className="text-primary">@userinfobot</span> → your numeric ID
+                    Dapatkan dari <span className="text-primary">@userinfobot</span> → ID numerik kamu
                   </p>
                 </div>
               </div>
               <div className="border-t border-border/30 pt-4 space-y-1">
-                <p className="text-xs font-medium text-muted-foreground mb-3">Notification triggers</p>
+                <p className="text-xs font-medium text-muted-foreground mb-3">Pemicu notifikasi</p>
               {[
-                { key: "notifyOnBuy" as const, label: "Buy Order", desc: "Notify when a BUY order is placed" },
-                { key: "notifyOnSell" as const, label: "Sell Order", desc: "Notify when a SELL order is placed" },
-                { key: "notifyOnError" as const, label: "Errors", desc: "Notify on order errors or failures" },
-                { key: "notifyOnStart" as const, label: "Bot Started", desc: "Notify when a bot is started" },
-                { key: "notifyOnStop" as const, label: "Bot Stopped / SL/TP", desc: "Notify when a bot stops or triggers SL/TP" },
+                { key: "notifyOnBuy" as const, label: "Order Beli", desc: "Notifikasi saat order BUY ditempatkan" },
+                { key: "notifyOnSell" as const, label: "Order Jual", desc: "Notifikasi saat order SELL ditempatkan" },
+                { key: "notifyOnError" as const, label: "Error", desc: "Notifikasi saat order error atau gagal" },
+                { key: "notifyOnStart" as const, label: "Bot Dimulai", desc: "Notifikasi saat bot dijalankan" },
+                { key: "notifyOnStop" as const, label: "Bot Berhenti / SL/TP", desc: "Notifikasi saat bot berhenti atau SL/TP terpicu" },
               ].map(({ key, label, desc }) => (
                 <div key={key} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
                   <div>
@@ -347,7 +347,7 @@ export default function Settings() {
               disabled={updateMutation.isPending}
             >
               <Save className="w-5 h-5 mr-2" />
-              {updateMutation.isPending ? "Saving..." : "Save Configuration"}
+              {updateMutation.isPending ? "Menyimpan..." : "Simpan Konfigurasi"}
             </Button>
           </div>
         </form>

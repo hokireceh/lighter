@@ -165,13 +165,13 @@ function RecentlyListedPanel({ items }: { items: MarketRow[] }) {
     <div style={{ background: "#0f0f1a", border: "1px solid #1e1e2e", borderRadius: 8, padding: "14px 16px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
         <span style={{ fontSize: 16 }}>🆕</span>
-        <span style={{ fontWeight: 700, color: "#e2e8f0", fontSize: 13 }}>Recently Listed</span>
+        <span style={{ fontWeight: 700, color: "#e2e8f0", fontSize: 13 }}>Baru Terdaftar</span>
         <TrendingDown size={14} style={{ color: "#94a3b8", marginLeft: "auto" }} />
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: "6px 12px", fontSize: 12 }}>
-        <span style={{ color: "#64748b", fontWeight: 600, paddingBottom: 4, borderBottom: "1px solid #1e1e2e" }}>Asset</span>
-        <span style={{ color: "#64748b", fontWeight: 600, textAlign: "right", paddingBottom: 4, borderBottom: "1px solid #1e1e2e" }}>Price</span>
-        <span style={{ color: "#64748b", fontWeight: 600, textAlign: "right", paddingBottom: 4, borderBottom: "1px solid #1e1e2e" }}>Age</span>
+        <span style={{ color: "#64748b", fontWeight: 600, paddingBottom: 4, borderBottom: "1px solid #1e1e2e" }}>Aset</span>
+        <span style={{ color: "#64748b", fontWeight: 600, textAlign: "right", paddingBottom: 4, borderBottom: "1px solid #1e1e2e" }}>Harga</span>
+        <span style={{ color: "#64748b", fontWeight: 600, textAlign: "right", paddingBottom: 4, borderBottom: "1px solid #1e1e2e" }}>Umur</span>
         {items.map((m) => (
           <>
             <span key={`n-${m.index}`} style={{ display: "flex", alignItems: "center", gap: 6, paddingTop: 5 }}>
@@ -200,7 +200,7 @@ function BiggestMoversPanel({ gainers, losers }: { gainers: MarketRow[]; losers:
     <div style={{ background: "#0f0f1a", border: "1px solid #1e1e2e", borderRadius: 8, padding: "14px 16px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
         <span style={{ fontSize: 16 }}>📈</span>
-        <span style={{ fontWeight: 700, color: "#e2e8f0", fontSize: 13 }}>Biggest Movers</span>
+        <span style={{ fontWeight: 700, color: "#e2e8f0", fontSize: 13 }}>Pergerakan Terbesar</span>
         <TrendingUp size={14} style={{ color: "#94a3b8", marginLeft: "auto" }} />
         <div style={{ display: "flex", gap: 4, marginLeft: 8 }}>
           {(["gainers", "losers"] as const).map((t) => (
@@ -210,7 +210,7 @@ function BiggestMoversPanel({ gainers, losers }: { gainers: MarketRow[]; losers:
               color: tab === t ? (t === "gainers" ? "#22c55e" : "#ef4444") : "#64748b",
               borderColor: tab === t ? (t === "gainers" ? "#166534" : "#7f1d1d") : "#1e1e2e",
             }}>
-              {t === "gainers" ? "Gainers" : "Losers"}
+              {t === "gainers" ? "Naik" : "Turun"}
             </button>
           ))}
         </div>
@@ -229,7 +229,7 @@ function BiggestMoversPanel({ gainers, losers }: { gainers: MarketRow[]; losers:
             </span>
           </div>
         ))}
-        {items.length === 0 && <span style={{ color: "#64748b", fontSize: 12 }}>No data</span>}
+        {items.length === 0 && <span style={{ color: "#64748b", fontSize: 12 }}>Tidak ada data</span>}
       </div>
     </div>
   );
@@ -320,7 +320,7 @@ export default function Markets() {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 400, flexDirection: "column", gap: 12 }}>
         <BarChart2 size={48} style={{ color: "#ef4444", opacity: 0.5 }} />
         <span style={{ color: "#ef4444", fontSize: 14 }}>{error}</span>
-        <button onClick={fetchData} style={{ padding: "8px 20px", borderRadius: 6, background: "#6366f1", color: "white", border: "none", cursor: "pointer", fontSize: 13 }}>Retry</button>
+        <button onClick={fetchData} style={{ padding: "8px 20px", borderRadius: 6, background: "#6366f1", color: "white", border: "none", cursor: "pointer", fontSize: 13 }}>Coba Lagi</button>
       </div>
     );
   }
@@ -381,18 +381,18 @@ export default function Markets() {
 
         {/* Header */}
         <div style={{ marginBottom: 20 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f1f5f9", margin: 0 }}>Markets</h1>
-          <p style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>Live market data from Lighter.xyz DEX</p>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f1f5f9", margin: 0 }}>Pasar</h1>
+          <p style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>Data pasar langsung dari DEX Lighter.xyz</p>
         </div>
 
         {/* Stats Row */}
         {stats && (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12, marginBottom: 20 }}>
             {[
-              { label: "Total Markets", value: stats.totalMarkets.toString(), sub: `${stats.perpCount} Perp · ${stats.spotCount} Spot` },
-              { label: "24h Trading Volume", value: formatVolume(stats.totalVolume24h), sub: "Across all pairs" },
-              { label: "Open Interest", value: stats.totalOpenInterest > 0 ? formatVolume(stats.totalOpenInterest) : "—", sub: "Perpetuals" },
-              { label: "Perp Markets", value: stats.perpCount.toString(), sub: "Max 50× leverage" },
+              { label: "Total Pasar", value: stats.totalMarkets.toString(), sub: `${stats.perpCount} Perp · ${stats.spotCount} Spot` },
+              { label: "Volume Trading 24j", value: formatVolume(stats.totalVolume24h), sub: "Semua pasangan" },
+              { label: "Open Interest", value: stats.totalOpenInterest > 0 ? formatVolume(stats.totalOpenInterest) : "—", sub: "Perpetual" },
+              { label: "Pasar Perp", value: stats.perpCount.toString(), sub: "Maks leverage 50×" },
             ].map((s) => (
               <div key={s.label} style={{ background: "#0f0f1a", border: "1px solid #1e1e2e", borderRadius: 8, padding: "12px 14px" }}>
                 <div style={{ fontSize: 11, color: "#64748b", marginBottom: 4 }}>{s.label}</div>
@@ -418,7 +418,7 @@ export default function Markets() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search name or symbol..."
+              placeholder="Cari nama atau simbol..."
               style={{
                 width: "100%", paddingLeft: 32, paddingRight: 12, paddingTop: 7, paddingBottom: 7,
                 background: "#0f0f1a", border: "1px solid #1e1e2e", borderRadius: 6,
@@ -435,9 +435,9 @@ export default function Markets() {
             }}
           >
             <Star size={13} fill={showOnlyFavs ? "#fbbf24" : "none"} stroke={showOnlyFavs ? "#fbbf24" : "#64748b"} />
-            Favorites
+            Favorit
           </button>
-          <span style={{ fontSize: 11, color: "#475569", marginLeft: "auto" }}>{sorted.length} markets</span>
+          <span style={{ fontSize: 11, color: "#475569", marginLeft: "auto" }}>{sorted.length} pasar</span>
         </div>
 
         {/* Market Table */}
@@ -446,13 +446,13 @@ export default function Markets() {
             <thead>
               <tr>
                 <th style={{ ...th, width: 32, paddingLeft: 12 }}>⭐</th>
-                {thBtn("symbol", "Asset ↕")}
-                {thBtn("volume24h", "24h Volume", true)}
-                {thBtn("lastPrice", "Price", true)}
-                {thBtn("priceChange24h", "24h Change", true)}
+                {thBtn("symbol", "Aset ↕")}
+                {thBtn("volume24h", "Volume 24j", true)}
+                {thBtn("lastPrice", "Harga", true)}
+                {thBtn("priceChange24h", "Perubahan 24j", true)}
                 {thBtn("openInterest", "Open Interest", true)}
-                {thBtn("listedAt", "Listed At", true)}
-                <th style={{ ...th, textAlign: "right" }}>Last 7 Days</th>
+                {thBtn("listedAt", "Terdaftar", true)}
+                <th style={{ ...th, textAlign: "right" }}>7 Hari Terakhir</th>
               </tr>
             </thead>
             <tbody>

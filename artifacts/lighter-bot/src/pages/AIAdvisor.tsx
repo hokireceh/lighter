@@ -68,9 +68,9 @@ const conditionConfig: Record<MarketCondition, { label: string; color: string; I
 };
 
 const riskConfig: Record<RiskLevel, { label: string; color: string; Icon: typeof Shield }> = {
-  low: { label: "Low Risk", color: "text-success", Icon: Shield },
-  medium: { label: "Medium Risk", color: "text-warning", Icon: AlertTriangle },
-  high: { label: "High Risk", color: "text-destructive", Icon: Target },
+  low: { label: "Risiko Rendah", color: "text-success", Icon: Shield },
+  medium: { label: "Risiko Sedang", color: "text-warning", Icon: AlertTriangle },
+  high: { label: "Risiko Tinggi", color: "text-destructive", Icon: Target },
 };
 
 function ConfidenceBar({ value }: { value: number }) {
@@ -78,7 +78,7 @@ function ConfidenceBar({ value }: { value: number }) {
   return (
     <div className="space-y-1">
       <div className="flex justify-between text-xs text-muted-foreground">
-        <span>Confidence</span>
+        <span>Keyakinan</span>
         <span className="font-mono font-bold text-foreground">{value}%</span>
       </div>
       <div className="h-2 w-full bg-muted rounded-full overflow-hidden">

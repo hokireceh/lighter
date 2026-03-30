@@ -64,9 +64,9 @@ export default function Logs() {
       <header>
         <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
           <Terminal className="w-6 h-6 md:w-8 md:h-8 text-primary" />
-          System Logs
+          Log Sistem
         </h1>
-        <p className="text-muted-foreground mt-1 text-sm">Real-time bot execution and system events</p>
+        <p className="text-muted-foreground mt-1 text-sm">Eksekusi bot dan event sistem secara real-time</p>
       </header>
 
       <Card className="glass-panel flex-1 overflow-hidden flex flex-col border-border/50">
@@ -97,9 +97,9 @@ export default function Logs() {
             className="h-full overflow-y-auto bg-black/50 font-mono text-xs"
           >
             {isLoading ? (
-              <div className="p-4 text-muted-foreground animate-pulse">Loading logs...</div>
+              <div className="p-4 text-muted-foreground animate-pulse">Memuat log...</div>
             ) : !logs.length ? (
-              <div className="p-4 text-muted-foreground">No logs available.</div>
+              <div className="p-4 text-muted-foreground">Belum ada log.</div>
             ) : (
               <div className="p-2 sm:p-4 space-y-0.5">
                 {logs.map((log) => {

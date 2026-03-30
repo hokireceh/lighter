@@ -28,14 +28,13 @@ export default function Dashboard() {
     <div className="space-y-8 animate-in fade-in duration-500">
       <header>
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Overview of your Lighter trading activity</p>
+        <p className="text-muted-foreground mt-1">Ringkasan aktivitas trading Lighter kamu</p>
       </header>
 
-      {/* Stats Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="glass-panel hover:-translate-y-1 transition-transform duration-300">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Equity</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Ekuitas</CardTitle>
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
               <Wallet className="w-4 h-4 text-primary" />
             </div>
@@ -51,13 +50,13 @@ export default function Dashboard() {
                 className="text-2xl font-bold text-foreground" 
               />
             )}
-            <p className="text-xs text-muted-foreground mt-1">Available: ${account?.availableBalance?.toFixed(2) || '0.00'}</p>
+            <p className="text-xs text-muted-foreground mt-1">Tersedia: ${account?.availableBalance?.toFixed(2) || '0.00'}</p>
           </CardContent>
         </Card>
 
         <Card className="glass-panel hover:-translate-y-1 transition-transform duration-300">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active Bots</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Bot Aktif</CardTitle>
             <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
               <Activity className="w-4 h-4 text-accent" />
             </div>
@@ -70,13 +69,13 @@ export default function Dashboard() {
                 {runningStrategies.length} <span className="text-muted-foreground text-sm font-sans font-normal">/ {activeStrategies.length}</span>
               </div>
             )}
-            <p className="text-xs text-muted-foreground mt-1">Configured strategies</p>
+            <p className="text-xs text-muted-foreground mt-1">Strategi dikonfigurasi</p>
           </CardContent>
         </Card>
 
         <Card className="glass-panel hover:-translate-y-1 transition-transform duration-300">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Open Positions</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Posisi Terbuka</CardTitle>
             <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
               <ArrowRightLeft className="w-4 h-4 text-success" />
             </div>
@@ -89,13 +88,13 @@ export default function Dashboard() {
                 {account?.positions?.length || 0}
               </div>
             )}
-            <p className="text-xs text-muted-foreground mt-1">Across all markets</p>
+            <p className="text-xs text-muted-foreground mt-1">Di semua pasar</p>
           </CardContent>
         </Card>
 
         <Card className="glass-panel hover:-translate-y-1 transition-transform duration-300">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Unrealized PnL</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">PnL Belum Terealisasi</CardTitle>
             <div className="w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center">
               <TrendingUp className="w-4 h-4 text-warning" />
             </div>
@@ -111,12 +110,11 @@ export default function Dashboard() {
                 className="text-2xl font-bold" 
               />
             )}
-            <p className="text-xs text-muted-foreground mt-1">From open positions</p>
+            <p className="text-xs text-muted-foreground mt-1">Dari posisi terbuka</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Subscription status banner */}
       {user && (
         <div className={`rounded-xl px-4 py-3 flex items-center gap-3 text-sm border ${
           isExpired
@@ -133,8 +131,8 @@ export default function Dashboard() {
             {expiresAt && (
               <span className="ml-2 font-normal opacity-80">
                 {isExpired
-                  ? `Expired ${expiresAt.toLocaleDateString("id-ID")}`
-                  : `Expires ${expiresAt.toLocaleDateString("id-ID")} (${daysLeft} hari lagi)`}
+                  ? `Kadaluarsa ${expiresAt.toLocaleDateString("id-ID")}`
+                  : `Kadaluarsa ${expiresAt.toLocaleDateString("id-ID")} (${daysLeft} hari lagi)`}
               </span>
             )}
           </div>
@@ -142,11 +140,10 @@ export default function Dashboard() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Open Positions */}
         <Card className="glass-panel border-border/50">
           <CardHeader>
-            <CardTitle>Open Positions</CardTitle>
-            <CardDescription>Your current risk exposure</CardDescription>
+            <CardTitle>Posisi Terbuka</CardTitle>
+            <CardDescription>Eksposur risiko saat ini</CardDescription>
           </CardHeader>
           <CardContent>
             {loadingAccount ? (
@@ -156,7 +153,7 @@ export default function Dashboard() {
             ) : !account?.positions?.length ? (
               <div className="text-center py-8 text-muted-foreground flex flex-col items-center">
                 <AlertTriangle className="w-8 h-8 mb-2 opacity-20" />
-                <p>No open positions.</p>
+                <p>Tidak ada posisi terbuka.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -182,14 +179,13 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Recent Logs */}
         <Card className="glass-panel border-border/50">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Activity Feed</CardTitle>
-              <CardDescription>Latest bot operations</CardDescription>
+              <CardTitle>Aktivitas Terbaru</CardTitle>
+              <CardDescription>Operasi bot terkini</CardDescription>
             </div>
-            <Link href="/logs" className="text-sm text-primary hover:text-primary/80">View all</Link>
+            <Link href="/logs" className="text-sm text-primary hover:text-primary/80">Lihat semua</Link>
           </CardHeader>
           <CardContent>
             {loadingLogs ? (
@@ -198,7 +194,7 @@ export default function Dashboard() {
               </div>
             ) : !logsData?.logs.length ? (
               <div className="text-center py-8 text-muted-foreground">
-                <p>No recent activity.</p>
+                <p>Belum ada aktivitas.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -212,7 +208,7 @@ export default function Dashboard() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-baseline gap-2">
-                        <span className="font-medium text-foreground truncate">{log.strategyName || 'System'}</span>
+                        <span className="font-medium text-foreground truncate">{log.strategyName || 'Sistem'}</span>
                         <span className="text-xs text-muted-foreground shrink-0 font-mono">
                           {formatWIBTime(log.createdAt)}
                         </span>

@@ -41,12 +41,12 @@ export default function Trades() {
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-3">
             <History className="w-6 h-6 md:w-8 md:h-8 text-primary" />
-            Trade History
+            Riwayat Trade
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">Complete log of executed and pending orders</p>
+          <p className="text-muted-foreground mt-1 text-sm">Log lengkap order yang dieksekusi dan tertunda</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Show:</span>
+          <span className="text-sm text-muted-foreground">Tampilkan:</span>
           <Select value={limit.toString()} onValueChange={(v) => setLimit(parseInt(v))}>
             <SelectTrigger className="w-24 bg-card">
               <SelectValue />
@@ -74,7 +74,7 @@ export default function Trades() {
         ) : !data?.trades.length ? (
           <Card className="glass-panel">
             <CardContent className="p-6 text-center text-muted-foreground text-sm">
-              No trades found.
+              Belum ada trade.
             </CardContent>
           </Card>
         ) : (
@@ -136,12 +136,12 @@ export default function Trades() {
             <Table>
               <TableHeader className="bg-muted/50">
                 <TableRow className="border-border/50 hover:bg-transparent">
-                  <TableHead className="w-[180px]">Time</TableHead>
-                  <TableHead>Market</TableHead>
-                  <TableHead className="hidden md:table-cell">Strategy</TableHead>
-                  <TableHead>Side</TableHead>
-                  <TableHead className="text-right">Price</TableHead>
-                  <TableHead className="text-right hidden md:table-cell">Size</TableHead>
+                  <TableHead className="w-[180px]">Waktu</TableHead>
+                  <TableHead>Pasar</TableHead>
+                  <TableHead className="hidden md:table-cell">Strategi</TableHead>
+                  <TableHead>Sisi</TableHead>
+                  <TableHead className="text-right">Harga</TableHead>
+                  <TableHead className="text-right hidden md:table-cell">Ukuran</TableHead>
                   <TableHead className="text-right">Status</TableHead>
                 </TableRow>
               </TableHeader>
@@ -161,7 +161,7 @@ export default function Trades() {
                 ) : !data?.trades.length ? (
                   <TableRow>
                     <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
-                      No trades found.
+                      Belum ada trade.
                     </TableCell>
                   </TableRow>
                 ) : (
