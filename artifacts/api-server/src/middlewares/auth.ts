@@ -1,5 +1,4 @@
 import type { Request, Response, NextFunction } from "express";
-import bcrypt from "bcryptjs";
 import { db } from "@workspace/db";
 import { usersTable } from "@workspace/db";
 import { eq, and, gt } from "drizzle-orm";
@@ -26,36 +25,13 @@ export async function authMiddleware(req: AuthRequest, res: Response, next: Next
   }
 
   try {
-    // Find user by active status and expiry — we will verify password manually
-    // to support both hashed (new) and unhashed (legacy) comparisons.
-    const users = await db.query.usersTable.findMany({
+    const matchedUser = await db.query.usersTable.findFirst({
       where: and(
+        eq(usersTable.password, password),
         eq(usersTable.isActive, true),
         gt(usersTable.expiresAt, new Date())
       ),
     });
-
-    let matchedUser: typeof users[number] | null = null;
-
-    for (const user of users) {
-      if (user.passwordHash) {
-        // Modern: bcrypt comparison
-        const match = await bcrypt.compare(password, user.passwordHash);
-        if (match) { matchedUser = user; break; }
-      } else {
-        // Legacy: plain text comparison (transparent migration)
-        if (user.password === password) {
-          matchedUser = user;
-          // Upgrade: hash and store for next time
-          const hash = await bcrypt.hash(password, 12);
-          db.update(usersTable)
-            .set({ passwordHash: hash, updatedAt: new Date() })
-            .where(eq(usersTable.id, user.id))
-            .catch(() => {});
-          break;
-        }
-      }
-    }
 
     if (!matchedUser) {
       return res.status(401).json({ error: "Password tidak valid atau langganan sudah habis" });

@@ -92,7 +92,6 @@ Always respond with a valid JSON object only, no markdown, no explanation outsid
     "side": "buy" | "sell",
     "orderType": "limit" | "post_only",
     "limitPriceOffset": number,         // USDC offset from market price
-    "cancelStaleAfterIntervals": number // e.g., 2 = cancel after 2x interval
   } | null,
   "grid_params": {
     "lowerPrice": number,
@@ -131,7 +130,6 @@ export interface DCAParams {
   side: "buy" | "sell";
   orderType: "limit" | "post_only";
   limitPriceOffset: number;
-  cancelStaleAfterIntervals: number;
 }
 
 export interface GridParams {
@@ -288,7 +286,6 @@ export async function analyzeMarketForStrategy(
       side: parsed.dca_params.side ?? "buy",
       orderType: parsed.dca_params.orderType ?? "limit",
       limitPriceOffset: parsed.dca_params.limitPriceOffset ?? 0.2,
-      cancelStaleAfterIntervals: parsed.dca_params.cancelStaleAfterIntervals ?? 2,
     } : null,
     grid_params: hasGrid ? {
       lowerPrice: parsed.grid_params.lowerPrice ?? market.lastPrice * 0.95,

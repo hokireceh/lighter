@@ -48,6 +48,3 @@ export function decrypt(value: string): string {
   return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString("utf8");
 }
 
-export function isEncrypted(value: string): boolean {
-  return typeof value === "string" && value.startsWith(PREFIX);
-}

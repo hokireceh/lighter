@@ -32,7 +32,6 @@ let koffi: any = null;
 let lib: any = null;
 let fnCreateClient: any = null;
 let fnSignCreateOrder: any = null;
-let fnSignCancelOrder: any = null;
 let fnSignChangePubKey: any = null;
 let fnGenerateAPIKey: any = null;
 let fnFree: any = null;
@@ -111,18 +110,6 @@ function loadLib(): void {
       "long long", // cIntegratorAccountIndex
       "int",       // cIntegratorTakerFee
       "int",       // cIntegratorMakerFee
-      "long long", // cNonce
-      "int",       // cApiKeyIndex
-      "long long", // cAccountIndex
-    ]
-  );
-
-  fnSignCancelOrder = lib.func(
-    "SignCancelOrder",
-    SignedTxResponseType,
-    [
-      "int",       // cMarketIndex
-      "long long", // cOrderIndex
       "long long", // cNonce
       "int",       // cApiKeyIndex
       "long long", // cAccountIndex
@@ -241,38 +228,6 @@ export function signCreateOrder(params: {
     0,  // integratorAccountIndex
     0,  // integratorTakerFee
     0,  // integratorMakerFee
-    params.nonce,
-    params.apiKeyIndex,
-    params.accountIndex
-  );
-
-  const txInfo = readCStr(resp.txInfo);
-  const txHash = readCStr(resp.txHash);
-  const err = readCStr(resp.err);
-
-  // Do NOT call fnFree on struct fields returned by value — koffi already
-  // decoded them to JS strings; passing JS values to C Free() crashes the process.
-
-  return {
-    txType: resp.txType,
-    txInfo: txInfo ?? "",
-    txHash: txHash ?? "",
-    err,
-  };
-}
-
-export function signCancelOrder(params: {
-  marketIndex: number;
-  orderIndex: number;
-  nonce: number;
-  apiKeyIndex: number;
-  accountIndex: number;
-}): SignResult {
-  loadLib();
-
-  const resp = fnSignCancelOrder(
-    params.marketIndex,
-    params.orderIndex,
     params.nonce,
     params.apiKeyIndex,
     params.accountIndex
