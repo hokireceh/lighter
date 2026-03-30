@@ -332,10 +332,13 @@ async function executeLiveOrder(params: {
       ? currentPrice.sub(offset)
       : currentPrice.add(offset);
     lighterOrderType = 0;   // LimitOrder
-    // PostOnly (2): rejected by exchange if it would immediately cross (maker-only guarantee)
-    // GoodTillTime (1): standard limit, can fill as taker if crossing
+    // PostOnly (2): maker-only, rejected immediately if it would cross — no expiry needed
+    // GoodTillTime (1): standard limit, stays in book until expiry
     lighterTimeInForce = orderKind === "post_only" ? 2 : 1;
-    lighterOrderExpiry = Math.floor(Date.now() / 1000) + 28 * 24 * 60 * 60; // 28 days from now (seconds)
+    // PostOnly orders don't use expiry (set to 0); GTT limited to 7 days max
+    lighterOrderExpiry = orderKind === "post_only"
+      ? 0
+      : Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60; // 7 days from now
   } else {
     const slippageFactor = side === "buy" ? 1.05 : 0.95;
     executionPrice = currentPrice.mul(slippageFactor);
@@ -605,7 +608,10 @@ async function executeBatchLiveOrders(params: {
     executionPrice = side === "buy" ? currentPrice.sub(offset) : currentPrice.add(offset);
     lighterOrderType = 0;
     lighterTimeInForce = orderKind === "post_only" ? 2 : 1; // PostOnly=2, GoodTillTime=1
-    lighterOrderExpiry = Math.floor(Date.now() / 1000) + 28 * 24 * 60 * 60;
+    // PostOnly = no expiry needed; GTT = max 7 days
+    lighterOrderExpiry = orderKind === "post_only"
+      ? 0
+      : Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60;
   } else {
     const slippageFactor = side === "buy" ? 1.05 : 0.95;
     executionPrice = currentPrice.mul(slippageFactor);
