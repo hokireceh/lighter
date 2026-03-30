@@ -237,12 +237,12 @@ function DcaEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Amount (USDC)</Label>
-          <Input type="number" step="0.01" {...form.register("amountPerOrder")} className="bg-background font-mono" />
+          <Input type="text" inputMode="decimal" {...form.register("amountPerOrder")} className="bg-background font-mono" />
           {form.formState.errors.amountPerOrder && <p className="text-xs text-destructive">{form.formState.errors.amountPerOrder.message}</p>}
         </div>
         <div className="space-y-2">
           <Label>Interval (Minutes)</Label>
-          <Input type="number" {...form.register("intervalMinutes")} className="bg-background font-mono" />
+          <Input type="text" inputMode="numeric" {...form.register("intervalMinutes")} className="bg-background font-mono" />
           {form.formState.errors.intervalMinutes && <p className="text-xs text-destructive">{form.formState.errors.intervalMinutes.message}</p>}
         </div>
       </div>
@@ -277,7 +277,7 @@ function DcaEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =>
             Limit Price Offset (USDC)
             <span className="ml-1.5 text-xs text-muted-foreground">— offset from market price</span>
           </Label>
-          <Input type="number" step="0.01" {...form.register("limitPriceOffset")} className="bg-background font-mono" />
+          <Input type="text" inputMode="decimal" {...form.register("limitPriceOffset")} className="bg-background font-mono" />
           <p className="text-xs text-muted-foreground">
             Buy: places order <strong>below</strong> market price. Sell: places <strong>above</strong>.
           </p>
@@ -408,12 +408,12 @@ function GridEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Lower Price</Label>
-          <Input type="number" step="0.01" {...form.register("lowerPrice")} className="bg-background font-mono" />
+          <Input type="text" inputMode="decimal" {...form.register("lowerPrice")} className="bg-background font-mono" />
           {form.formState.errors.lowerPrice && <p className="text-xs text-destructive">{form.formState.errors.lowerPrice.message}</p>}
         </div>
         <div className="space-y-2">
           <Label>Upper Price</Label>
-          <Input type="number" step="0.01" {...form.register("upperPrice")} className="bg-background font-mono" />
+          <Input type="text" inputMode="decimal" {...form.register("upperPrice")} className="bg-background font-mono" />
           {form.formState.errors.upperPrice && <p className="text-xs text-destructive">{form.formState.errors.upperPrice.message}</p>}
         </div>
       </div>
@@ -421,12 +421,12 @@ function GridEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Grid Levels</Label>
-          <Input type="number" {...form.register("gridLevels")} className="bg-background font-mono" />
+          <Input type="text" inputMode="numeric" {...form.register("gridLevels")} className="bg-background font-mono" />
           {form.formState.errors.gridLevels && <p className="text-xs text-destructive">{form.formState.errors.gridLevels.message}</p>}
         </div>
         <div className="space-y-2">
           <Label>Amount per Grid (USDC)</Label>
-          <Input type="number" step="0.01" {...form.register("amountPerGrid")} className="bg-background font-mono" />
+          <Input type="text" inputMode="decimal" {...form.register("amountPerGrid")} className="bg-background font-mono" />
           {form.formState.errors.amountPerGrid && <p className="text-xs text-destructive">{form.formState.errors.amountPerGrid.message}</p>}
         </div>
       </div>
@@ -465,7 +465,7 @@ function GridEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =
             Limit Price Offset (USDC)
             <span className="ml-1.5 text-xs text-muted-foreground">— offset dari harga pasar saat eksekusi</span>
           </Label>
-          <Input type="number" step="0.01" {...form.register("limitPriceOffset")} className="bg-background font-mono" />
+          <Input type="text" inputMode="decimal" {...form.register("limitPriceOffset")} className="bg-background font-mono" />
           <p className="text-xs text-muted-foreground">
             Buy: order di <strong>bawah</strong> harga pasar. Sell: di <strong>atas</strong> harga pasar. Set 0 untuk tepat di harga pasar.
           </p>
@@ -475,12 +475,12 @@ function GridEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Stop Loss <span className="text-xs text-muted-foreground">(optional)</span></Label>
-          <Input type="number" step="0.01" {...form.register("stopLoss")} placeholder="e.g. 1700" className="bg-background font-mono" />
+          <Input type="text" inputMode="decimal" {...form.register("stopLoss")} placeholder="e.g. 1700" className="bg-background font-mono" />
           <p className="text-xs text-muted-foreground">Bot stops if price drops below this</p>
         </div>
         <div className="space-y-2">
           <Label>Take Profit <span className="text-xs text-muted-foreground">(optional)</span></Label>
-          <Input type="number" step="0.01" {...form.register("takeProfit")} placeholder="e.g. 2500" className="bg-background font-mono" />
+          <Input type="text" inputMode="decimal" {...form.register("takeProfit")} placeholder="e.g. 2500" className="bg-background font-mono" />
           <p className="text-xs text-muted-foreground">Bot stops if price rises above this</p>
         </div>
       </div>

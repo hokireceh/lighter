@@ -172,12 +172,13 @@ function buildUserPrompt(strategyType: "dca" | "grid", market: MarketContext): s
     : "low (<$2B)";
 
   return `Analyze this Lighter DEX market and recommend optimal ${strategyType.toUpperCase()} strategy parameters.
+IMPORTANT: All numbers in your JSON response MUST use a dot (.) as the decimal separator, never a comma. Example: 64956.4 not 64956,4.
 
 Market: ${market.symbol} (${market.type})
 Current Price: $${market.lastPrice.toFixed(4)}
 24h Range: ${range24h}
 24h Volatility: ${volatility}%
-24h Volume: $${market.volume24h.toLocaleString()} (${volumeContext})
+24h Volume: $${market.volume24h.toFixed(0)} (${volumeContext})
 24h Price Change: ${market.priceChangePct24h > 0 ? "+" : ""}${market.priceChangePct24h.toFixed(2)}%
 Min Order Size: ${market.minBaseAmount} ${market.symbol.split("-")[0]} / $${market.minQuoteAmount} USDC
 

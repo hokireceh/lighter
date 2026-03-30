@@ -171,6 +171,21 @@ function AIInsightCard({ result }: { result: AIResult }) {
   );
 }
 
+// Sanitize numbers from AI — guard against European locale format (comma decimal separator).
+// JS JSON.parse normally enforces dot-decimal, but some models occasionally produce
+// string fields. This ensures we always store a clean JS number.
+function sanitizeAINumber(value: unknown): number | undefined {
+  if (value === null || value === undefined) return undefined;
+  if (typeof value === "number" && !isNaN(value)) return value;
+  // Handle string like "64956,4" → 64956.4
+  if (typeof value === "string") {
+    const cleaned = value.replace(/\./g, "").replace(",", ".");
+    const n = parseFloat(cleaned);
+    return isNaN(n) ? undefined : n;
+  }
+  return undefined;
+}
+
 async function fetchAIAnalysis(strategyType: "dca" | "grid", marketIndex: number) {
   const token = localStorage.getItem("lb_token") ?? "";
   const res = await fetch("/api/ai/analyze", {
@@ -230,11 +245,14 @@ function DcaForm({ markets, onSuccess, onCancel }: DcaFormProps) {
       const data = await fetchAIAnalysis("dca", selectedMarket.index);
       const rec = data.dca_params;
       if (!rec) throw new Error("AI did not return DCA parameters");
-      if (rec.amountPerOrder) form.setValue("amountPerOrder", rec.amountPerOrder);
-      if (rec.intervalMinutes) form.setValue("intervalMinutes", rec.intervalMinutes);
+      const amountPerOrder = sanitizeAINumber(rec.amountPerOrder);
+      const intervalMinutes = sanitizeAINumber(rec.intervalMinutes);
+      const limitPriceOffset = sanitizeAINumber(rec.limitPriceOffset);
+      if (amountPerOrder) form.setValue("amountPerOrder", amountPerOrder);
+      if (intervalMinutes) form.setValue("intervalMinutes", intervalMinutes);
       if (rec.side) form.setValue("side", rec.side);
       if (rec.orderType) form.setValue("orderType", rec.orderType);
-      if (rec.limitPriceOffset !== undefined) form.setValue("limitPriceOffset", rec.limitPriceOffset);
+      if (limitPriceOffset !== undefined) form.setValue("limitPriceOffset", limitPriceOffset);
       setAiResult({ reasoning: data.reasoning, marketCondition: data.marketCondition, riskLevel: data.riskLevel, confidence: data.confidence, modelUsed: data.modelUsed, modelTier: data.modelTier });
       toast({ title: "AI Analysis Complete", description: `Parameters auto-filled using ${data.modelTier}` });
     } catch (err: any) {
@@ -292,12 +310,12 @@ function DcaForm({ markets, onSuccess, onCancel }: DcaFormProps) {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Amount (USDC)</Label>
-          <Input type="number" step="0.01" {...form.register("amountPerOrder")} placeholder="100" className="bg-background font-mono" />
+          <Input type="text" inputMode="decimal" {...form.register("amountPerOrder")} placeholder="100" className="bg-background font-mono" />
           {form.formState.errors.amountPerOrder && <p className="text-xs text-destructive">{form.formState.errors.amountPerOrder.message}</p>}
         </div>
         <div className="space-y-2">
           <Label>Interval (Minutes)</Label>
-          <Input type="number" {...form.register("intervalMinutes")} placeholder="1440" className="bg-background font-mono" />
+          <Input type="text" inputMode="numeric" {...form.register("intervalMinutes")} placeholder="1440" className="bg-background font-mono" />
           {form.formState.errors.intervalMinutes && <p className="text-xs text-destructive">{form.formState.errors.intervalMinutes.message}</p>}
         </div>
       </div>
@@ -332,7 +350,7 @@ function DcaForm({ markets, onSuccess, onCancel }: DcaFormProps) {
             Limit Price Offset (USDC)
             <span className="ml-1.5 text-xs text-muted-foreground">— offset dari harga pasar saat eksekusi</span>
           </Label>
-          <Input type="number" step="0.01" {...form.register("limitPriceOffset")} placeholder="e.g. 10" className="bg-background font-mono" />
+          <Input type="text" inputMode="decimal" {...form.register("limitPriceOffset")} placeholder="e.g. 10" className="bg-background font-mono" />
           <p className="text-xs text-muted-foreground">
             Buy: order di <strong>bawah</strong> harga pasar. Sell: di <strong>atas</strong> harga pasar.
           </p>
@@ -393,15 +411,22 @@ function GridForm({ markets, onSuccess, onCancel }: GridFormProps) {
       const data = await fetchAIAnalysis("grid", selectedMarket.index);
       const rec = data.grid_params;
       if (!rec) throw new Error("AI did not return Grid parameters");
-      if (rec.lowerPrice) form.setValue("lowerPrice", rec.lowerPrice);
-      if (rec.upperPrice) form.setValue("upperPrice", rec.upperPrice);
-      if (rec.gridLevels) form.setValue("gridLevels", rec.gridLevels);
-      if (rec.amountPerGrid) form.setValue("amountPerGrid", rec.amountPerGrid);
+      const lowerPrice = sanitizeAINumber(rec.lowerPrice);
+      const upperPrice = sanitizeAINumber(rec.upperPrice);
+      const gridLevels = sanitizeAINumber(rec.gridLevels);
+      const amountPerGrid = sanitizeAINumber(rec.amountPerGrid);
+      const limitPriceOffset = sanitizeAINumber(rec.limitPriceOffset);
+      const stopLoss = sanitizeAINumber(rec.stopLoss);
+      const takeProfit = sanitizeAINumber(rec.takeProfit);
+      if (lowerPrice) form.setValue("lowerPrice", lowerPrice);
+      if (upperPrice) form.setValue("upperPrice", upperPrice);
+      if (gridLevels) form.setValue("gridLevels", gridLevels);
+      if (amountPerGrid) form.setValue("amountPerGrid", amountPerGrid);
       if (rec.mode) form.setValue("mode", rec.mode);
       if (rec.orderType) form.setValue("orderType", rec.orderType);
-      if (rec.limitPriceOffset !== undefined) form.setValue("limitPriceOffset", rec.limitPriceOffset);
-      if (rec.stopLoss) form.setValue("stopLoss", rec.stopLoss);
-      if (rec.takeProfit) form.setValue("takeProfit", rec.takeProfit);
+      if (limitPriceOffset !== undefined) form.setValue("limitPriceOffset", limitPriceOffset);
+      if (stopLoss) form.setValue("stopLoss", stopLoss);
+      if (takeProfit) form.setValue("takeProfit", takeProfit);
       setAiResult({ reasoning: data.reasoning, marketCondition: data.marketCondition, riskLevel: data.riskLevel, confidence: data.confidence, modelUsed: data.modelUsed, modelTier: data.modelTier });
       toast({ title: "AI Analysis Complete", description: `Grid parameters auto-filled using ${data.modelTier}` });
     } catch (err: any) {
@@ -463,12 +488,12 @@ function GridForm({ markets, onSuccess, onCancel }: GridFormProps) {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Lower Price</Label>
-          <Input type="number" step="0.01" {...form.register("lowerPrice")} placeholder="1800" className="bg-background font-mono" />
+          <Input type="text" inputMode="decimal" {...form.register("lowerPrice")} placeholder="1800" className="bg-background font-mono" />
           {form.formState.errors.lowerPrice && <p className="text-xs text-destructive">{form.formState.errors.lowerPrice.message}</p>}
         </div>
         <div className="space-y-2">
           <Label>Upper Price</Label>
-          <Input type="number" step="0.01" {...form.register("upperPrice")} placeholder="2200" className="bg-background font-mono" />
+          <Input type="text" inputMode="decimal" {...form.register("upperPrice")} placeholder="2200" className="bg-background font-mono" />
           {form.formState.errors.upperPrice && <p className="text-xs text-destructive">{form.formState.errors.upperPrice.message}</p>}
         </div>
       </div>
@@ -476,12 +501,12 @@ function GridForm({ markets, onSuccess, onCancel }: GridFormProps) {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Grid Levels</Label>
-          <Input type="number" {...form.register("gridLevels")} placeholder="10" className="bg-background font-mono" />
+          <Input type="text" inputMode="numeric" {...form.register("gridLevels")} placeholder="10" className="bg-background font-mono" />
           {form.formState.errors.gridLevels && <p className="text-xs text-destructive">{form.formState.errors.gridLevels.message}</p>}
         </div>
         <div className="space-y-2">
           <Label>Amount per Grid (USDC)</Label>
-          <Input type="number" step="0.01" {...form.register("amountPerGrid")} placeholder="50" className="bg-background font-mono" />
+          <Input type="text" inputMode="decimal" {...form.register("amountPerGrid")} placeholder="50" className="bg-background font-mono" />
           {form.formState.errors.amountPerGrid && <p className="text-xs text-destructive">{form.formState.errors.amountPerGrid.message}</p>}
         </div>
       </div>
@@ -520,7 +545,7 @@ function GridForm({ markets, onSuccess, onCancel }: GridFormProps) {
             Limit Price Offset (USDC)
             <span className="ml-1.5 text-xs text-muted-foreground">— offset dari harga pasar saat eksekusi</span>
           </Label>
-          <Input type="number" step="0.01" {...form.register("limitPriceOffset")} placeholder="e.g. 5" className="bg-background font-mono" />
+          <Input type="text" inputMode="decimal" {...form.register("limitPriceOffset")} placeholder="e.g. 5" className="bg-background font-mono" />
           <p className="text-xs text-muted-foreground">
             Buy: order ditempatkan <strong>di bawah</strong> harga pasar. Sell: <strong>di atas</strong>. Set 0 untuk tepat di harga pasar.
           </p>
@@ -530,12 +555,12 @@ function GridForm({ markets, onSuccess, onCancel }: GridFormProps) {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Stop Loss <span className="text-xs text-muted-foreground">(optional)</span></Label>
-          <Input type="number" step="0.01" {...form.register("stopLoss")} placeholder="e.g. 1700" className="bg-background font-mono" />
+          <Input type="text" inputMode="decimal" {...form.register("stopLoss")} placeholder="e.g. 1700" className="bg-background font-mono" />
           <p className="text-xs text-muted-foreground">Bot stops if price drops below this</p>
         </div>
         <div className="space-y-2">
           <Label>Take Profit <span className="text-xs text-muted-foreground">(optional)</span></Label>
-          <Input type="number" step="0.01" {...form.register("takeProfit")} placeholder="e.g. 2500" className="bg-background font-mono" />
+          <Input type="text" inputMode="decimal" {...form.register("takeProfit")} placeholder="e.g. 2500" className="bg-background font-mono" />
           <p className="text-xs text-muted-foreground">Bot stops if price rises above this</p>
         </div>
       </div>
