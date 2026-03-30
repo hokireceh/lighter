@@ -452,11 +452,14 @@ export async function sendTxBatch(
 ): Promise<SendTxBatchResponse> {
   // NOTE: ReqSendTxBatch schema only accepts "tx_types" and "tx_infos".
   // "price_protection" is NOT part of the batch schema (unlike single sendTx).
-  // Any attempt to pass it is silently ignored by the server.
+  // tx_infos are JSON strings (e.g. {"...": ...}) so they CANNOT be comma-joined —
+  // the server would misparse them. Python SDK uses json.dumps() for both fields:
+  //   tx_types = json.dumps([14, 14])      → "[14,14]"
+  //   tx_infos = json.dumps(["{...}", "..."]) → JSON array of JSON strings
   const url = `${getBaseUrl(network)}/api/v1/sendTxBatch`;
   const body = new URLSearchParams();
-  body.set("tx_types", transactions.map((t) => String(t.txType)).join(","));
-  body.set("tx_infos", transactions.map((t) => t.txInfo).join(","));
+  body.set("tx_types", JSON.stringify(transactions.map((t) => t.txType)));
+  body.set("tx_infos", JSON.stringify(transactions.map((t) => t.txInfo)));
 
   for (let attempt = 0; attempt < LIGHTER_MAX_RETRIES; attempt++) {
     const controller = new AbortController();
