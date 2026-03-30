@@ -47,11 +47,13 @@ function unsubscribeMarket(marketIndex: number): void {
 
 function startKeepalive(): void {
   if (keepaliveTimer) clearInterval(keepaliveTimer);
+  // Send every 25 s — well within Lighter's 2-minute requirement
+  // and short enough to survive Apache/Nginx proxy timeout (typically 60–300 s).
   keepaliveTimer = setInterval(() => {
     if (ws?.readyState === WebSocket.OPEN) {
       sendJson({ type: "subscribe", channel: "height" });
     }
-  }, 60_000);
+  }, 25_000);
 }
 
 function stopKeepalive(): void {
