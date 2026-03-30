@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGetBotLogs, getGetBotLogsQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Terminal } from "lucide-react";
+import { Terminal, Copy, Check } from "lucide-react";
 import { formatWIBDateTime } from "@/lib/utils";
 
 export default function Logs() {
@@ -11,6 +11,22 @@ export default function Logs() {
   );
   const scrollRef = useRef<HTMLDivElement>(null);
   const userScrolledUp = useRef(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyAll = () => {
+    if (!logs.length) return;
+    const text = logs.map((log) => {
+      const ts = `[${formatWIBDateTime(log.createdAt)}]`;
+      const level = log.level.toUpperCase().padEnd(7);
+      const name = (log.strategyName || "SYSTEM").padEnd(20);
+      const msg = log.details ? `${log.message}\n  ${log.details}` : log.message;
+      return `${ts} ${level} ${name} ${msg}`;
+    }).join("\n");
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   // Detect jika user scroll manual ke atas — jangan paksa scroll balik
   const handleScroll = () => {
