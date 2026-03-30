@@ -273,7 +273,7 @@ function DcaForm({ markets, onSuccess, onCancel }: DcaFormProps) {
           intervalMinutes: data.intervalMinutes,
           side: data.side,
           orderType: data.orderType,
-          limitPriceOffset: data.orderType === "limit" ? (data.limitPriceOffset ?? 0) : 0,
+          limitPriceOffset: (data.orderType === "limit" || data.orderType === "post_only") ? (data.limitPriceOffset ?? 0) : 0,
         },
       },
     });
@@ -449,7 +449,7 @@ function GridForm({ markets, onSuccess, onCancel }: GridFormProps) {
           amountPerGrid: data.amountPerGrid,
           mode: data.mode,
           orderType: data.orderType,
-          limitPriceOffset: data.orderType === "limit" ? (data.limitPriceOffset ?? 0) : 0,
+          limitPriceOffset: (data.orderType === "limit" || data.orderType === "post_only") ? (data.limitPriceOffset ?? 0) : 0,
           stopLoss: data.stopLoss || null,
           takeProfit: data.takeProfit || null,
         },

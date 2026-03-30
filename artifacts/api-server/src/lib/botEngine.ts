@@ -293,26 +293,29 @@ async function executeLiveOrder(params: {
 
   const baseAmount = toBaseAmount(size.toNumber(), sizeDecimals);
 
-  // ── Bug Fix #1: Validate against exchange minimums before signing ──────────
-  // Lighter docs: "min_base_amount is the minimum amount in coin terms;
-  // min_quote_amount is the minimum in USDC. The highest of the two is applied."
-  // Orders below either minimum are silently rejected by the sequencer.
+  // ── Validate against exchange minimums before signing ─────────────────────
+  // Lighter docs: "Note that those minimums only apply to maker orders."
+  // min_base_amount and min_quote_amount ONLY apply to limit/post_only (maker).
+  // Market orders (IOC/taker) are NOT subject to these minimums.
   const minBase = marketInfo?.minBaseAmount ?? 0;
   const minQuote = marketInfo?.minQuoteAmount ?? 0;
+  const isMakerOrder = orderKind === "limit" || orderKind === "post_only";
 
-  if (minBase > 0 && size.lt(minBase)) {
-    const msg = `Order size ${size.toFixed(6)} ${strategy.marketSymbol} is below exchange minimum of ${minBase} (min_base_amount). Increase amountPerOrder.`;
-    await addLog(userId, strategy.id, strategy.name, "warn", "Order skipped: size below exchange minimum", msg);
-    logger.warn({ size: size.toNumber(), minBase, market: strategy.marketSymbol }, "Order below min_base_amount, skipped");
-    return;
-  }
+  if (isMakerOrder) {
+    if (minBase > 0 && size.lt(minBase)) {
+      const msg = `Order size ${size.toFixed(6)} ${strategy.marketSymbol} is below exchange minimum of ${minBase} (min_base_amount). Increase amountPerOrder.`;
+      await addLog(userId, strategy.id, strategy.name, "warn", "Order skipped: size below exchange minimum", msg);
+      logger.warn({ size: size.toNumber(), minBase, market: strategy.marketSymbol }, "Order below min_base_amount, skipped");
+      return;
+    }
 
-  const orderValueUsdc = size.mul(currentPrice);
-  if (minQuote > 0 && orderValueUsdc.lt(minQuote)) {
-    const msg = `Order value $${orderValueUsdc.toFixed(2)} USDC is below exchange minimum of $${minQuote} (min_quote_amount). Increase amountPerOrder.`;
-    await addLog(userId, strategy.id, strategy.name, "warn", "Order skipped: value below exchange minimum", msg);
-    logger.warn({ valueUsdc: orderValueUsdc.toNumber(), minQuote, market: strategy.marketSymbol }, "Order below min_quote_amount, skipped");
-    return;
+    const orderValueUsdc = size.mul(currentPrice);
+    if (minQuote > 0 && orderValueUsdc.lt(minQuote)) {
+      const msg = `Order value $${orderValueUsdc.toFixed(2)} USDC is below exchange minimum of $${minQuote} (min_quote_amount). Increase amountPerOrder.`;
+      await addLog(userId, strategy.id, strategy.name, "warn", "Order skipped: value below exchange minimum", msg);
+      logger.warn({ valueUsdc: orderValueUsdc.toNumber(), minQuote, market: strategy.marketSymbol }, "Order below min_quote_amount, skipped");
+      return;
+    }
   }
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -547,13 +550,17 @@ async function executeBatchLiveOrders(params: {
 
   const baseAmount = toBaseAmount(size.toNumber(), sizeDecimals);
 
-  if (minBase > 0 && size.lt(minBase)) {
-    await addLog(userId, strategy.id, strategy.name, "warn", "Batch order skipped: size below min_base_amount");
-    return;
-  }
-  if (minQuote > 0 && size.mul(currentPrice).lt(minQuote)) {
-    await addLog(userId, strategy.id, strategy.name, "warn", "Batch order skipped: value below min_quote_amount");
-    return;
+  // Lighter docs: minimums only apply to maker orders (limit/post_only), not market (taker) orders.
+  const isMakerOrder = orderKind === "limit" || orderKind === "post_only";
+  if (isMakerOrder) {
+    if (minBase > 0 && size.lt(minBase)) {
+      await addLog(userId, strategy.id, strategy.name, "warn", "Batch order skipped: size below min_base_amount");
+      return;
+    }
+    if (minQuote > 0 && size.mul(currentPrice).lt(minQuote)) {
+      await addLog(userId, strategy.id, strategy.name, "warn", "Batch order skipped: value below min_quote_amount");
+      return;
+    }
   }
 
   const accountIndex = botConfig.accountIndex!;

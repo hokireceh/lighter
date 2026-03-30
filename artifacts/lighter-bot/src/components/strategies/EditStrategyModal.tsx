@@ -207,7 +207,7 @@ function DcaEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =>
           intervalMinutes: data.intervalMinutes,
           side: data.side,
           orderType: data.orderType,
-          limitPriceOffset: data.orderType === "limit" ? (data.limitPriceOffset ?? 0) : 0,
+          limitPriceOffset: (data.orderType === "limit" || data.orderType === "post_only") ? (data.limitPriceOffset ?? 0) : 0,
         },
       },
     });
@@ -376,7 +376,7 @@ function GridEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =
           amountPerGrid: data.amountPerGrid,
           mode: data.mode,
           orderType: data.orderType,
-          limitPriceOffset: data.orderType === "limit" ? (data.limitPriceOffset ?? 0) : 0,
+          limitPriceOffset: (data.orderType === "limit" || data.orderType === "post_only") ? (data.limitPriceOffset ?? 0) : 0,
           stopLoss: data.stopLoss || null,
           takeProfit: data.takeProfit || null,
         },
