@@ -53,7 +53,7 @@ router.post("/analyze", async (req: AuthRequest, res) => {
       lastPrice: market.lastTradePrice,
       high24h: market.dailyHigh,
       low24h: market.dailyLow,
-      volume24h: market.dailyVolume,
+      volume24h: market.dailyVolumeQuote,
       priceChangePct24h: market.dailyPriceChange,
       minBaseAmount: market.minBaseAmount,
       minQuoteAmount: market.minQuoteAmount,
