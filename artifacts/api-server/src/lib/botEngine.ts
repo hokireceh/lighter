@@ -63,7 +63,7 @@ export function getAllRunningBots(): { strategyId: number; nextRunAt: Date }[] {
 }
 
 async function notifyUser(userId: number | null, message: string): Promise<void> {
-  if (!userId) return;
+  if (userId === null || userId === undefined) return;
   try {
     const config = await getBotConfig(userId);
     if (!config.notifyBotToken || !config.notifyChatId) return;
