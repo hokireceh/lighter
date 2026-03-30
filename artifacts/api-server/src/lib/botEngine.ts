@@ -958,46 +958,58 @@ export async function startBot(strategyId: number): Promise<boolean> {
 
   if (!strategy) return false;
 
-  // ── Pre-flight: warn immediately if grid amountPerGrid is below market minimum ──
-  // This gives the user early feedback instead of discovering the problem only
-  // when the first grid crossing happens (which could be hours later).
-  if (strategy.type === "grid") {
-    const gridCfg = strategy.gridConfig as {
-      amountPerGrid?: number;
-    } | null;
-    const amountPerGrid = gridCfg?.amountPerGrid ?? 0;
+  // ── Pre-flight: validate amount against exchange minimums — HARD STOP ────────
+  // If the configured amount is below the exchange minimum, the bot will never
+  // place any orders. We refuse to start rather than let it run silently idle.
+  {
     const userId = strategy.userId ?? null;
+    let validationError: string | null = null;
 
     try {
       const botCfg = userId !== null ? await getBotConfig(userId).catch(() => null) : null;
       const network = botCfg?.network ?? "mainnet";
       const marketInfo = await getMarketInfo(strategy.marketIndex, network);
 
-      if (marketInfo && amountPerGrid > 0) {
+      if (marketInfo) {
         const lastPrice = marketInfo.lastTradePrice > 0 ? marketInfo.lastTradePrice : null;
 
-        // Check minQuoteAmount directly (amountPerGrid is already in USDC)
-        if (marketInfo.minQuoteAmount > 0 && amountPerGrid < marketInfo.minQuoteAmount) {
-          await addLog(userId, strategyId, strategy.name, "warn",
-            `⚠️ amountPerGrid ($${amountPerGrid}) is below exchange minimum ($${marketInfo.minQuoteAmount} min_quote_amount)`,
-            `Orders will be skipped every crossing until amountPerGrid is increased. Recommended: $${Math.ceil(marketInfo.minQuoteAmount * 1.2)} or more.`
-          );
+        let amount = 0;
+        let amountLabel = "";
+
+        if (strategy.type === "grid") {
+          amount = (strategy.gridConfig as any)?.amountPerGrid ?? 0;
+          amountLabel = "amountPerGrid";
+        } else if (strategy.type === "dca") {
+          amount = (strategy.dcaConfig as any)?.amountPerOrder ?? 0;
+          amountLabel = "amountPerOrder";
         }
 
-        // Check minBaseAmount using last known price as estimate
-        if (lastPrice && marketInfo.minBaseAmount > 0) {
-          const estimatedSize = amountPerGrid / lastPrice;
-          if (estimatedSize < marketInfo.minBaseAmount) {
-            const minAmountNeeded = Math.ceil(marketInfo.minBaseAmount * lastPrice * 1.2 * 100) / 100;
-            await addLog(userId, strategyId, strategy.name, "warn",
-              `⚠️ amountPerGrid ($${amountPerGrid}) will produce orders below exchange minimum (${marketInfo.minBaseAmount} ${marketInfo.baseAsset})`,
-              `At current price $${lastPrice.toFixed(2)}: estimated size ${estimatedSize.toFixed(6)} < min ${marketInfo.minBaseAmount} ${marketInfo.baseAsset}. Orders will be skipped every crossing. Increase amountPerGrid to at least $${minAmountNeeded}.`
-            );
+        if (amount > 0) {
+          // Check minQuoteAmount (amount is already in USDC)
+          if (marketInfo.minQuoteAmount > 0 && amount < marketInfo.minQuoteAmount) {
+            const recommended = Math.ceil(marketInfo.minQuoteAmount * 1.2);
+            validationError = `${amountLabel} ($${amount}) di bawah minimum exchange ($${marketInfo.minQuoteAmount} USDC). Naikkan ke minimal $${recommended}.`;
+          }
+
+          // Check minBaseAmount using last known price
+          if (!validationError && lastPrice && marketInfo.minBaseAmount > 0) {
+            const estimatedSize = amount / lastPrice;
+            if (estimatedSize < marketInfo.minBaseAmount) {
+              const minNeeded = Math.ceil(marketInfo.minBaseAmount * lastPrice * 1.2 * 100) / 100;
+              validationError = `${amountLabel} ($${amount}) terlalu kecil — estimasi ${estimatedSize.toFixed(6)} ${marketInfo.baseAsset} < minimum ${marketInfo.minBaseAmount} ${marketInfo.baseAsset}. Naikkan ke minimal $${minNeeded}.`;
+            }
           }
         }
       }
     } catch (_err) {
-      // Pre-flight check is best-effort — never block bot start
+      // Market info fetch failed — best-effort, don't block start
+    }
+
+    if (validationError) {
+      await addLog(userId, strategyId, strategy.name, "error",
+        `❌ Bot tidak dapat dimulai: ${validationError}`
+      );
+      throw new Error(`BOT_VALIDATION_FAILED: ${validationError}`);
     }
   }
   // ─────────────────────────────────────────────────────────────────────────────

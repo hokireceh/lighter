@@ -112,7 +112,12 @@ export default function Strategies() {
       onSuccess: () => {
         toast({ title: "Bot Started", description: "Strategy is now running." });
         queryClient.invalidateQueries({ queryKey: getGetStrategiesQueryKey() });
-      }
+      },
+      onError: (err: any) => {
+        const msg = err?.response?.data?.error ?? err?.message ?? "Gagal memulai bot.";
+        toast({ title: "Tidak Dapat Memulai Bot", description: msg, variant: "destructive" });
+        queryClient.invalidateQueries({ queryKey: getGetStrategiesQueryKey() });
+      },
     }
   });
 

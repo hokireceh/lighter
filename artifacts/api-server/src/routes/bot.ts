@@ -30,6 +30,10 @@ router.post("/start/:strategyId", async (req: AuthRequest, res) => {
       nextRunAt: nextRunAt?.toISOString() ?? null,
     });
   } catch (err) {
+    const msg = err instanceof Error ? err.message : "Failed to start bot";
+    if (msg.startsWith("BOT_VALIDATION_FAILED:")) {
+      return res.status(400).json({ error: msg.replace("BOT_VALIDATION_FAILED: ", "") });
+    }
     req.log.error({ err, strategyId }, "Failed to start bot");
     res.status(500).json({ error: "Failed to start bot" });
   }
