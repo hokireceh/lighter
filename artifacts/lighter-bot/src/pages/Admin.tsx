@@ -226,7 +226,7 @@ export default function Admin() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2"><Shield className="h-6 w-6" /> Admin Panel</h1>
-            <p className="text-sm text-muted-foreground">Kelola Hokireceh Projects</p>
+            <p className="text-sm text-muted-foreground">Kelola HokirecehPro</p>
           </div>
           <Button variant="outline" size="sm" onClick={() => { fetchUsers(); fetchStrategies(); fetchPayments(); }} disabled={loading}>
             <RefreshCw className={`h-4 w-4 mr-1 ${loading ? "animate-spin" : ""}`} /> Refresh

@@ -7,6 +7,7 @@ import {
   History, 
   Settings, 
   Terminal,
+  Activity,
   LogOut,
   User,
   Sparkles
@@ -36,12 +37,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-background flex flex-col md:flex-row font-sans">
       {/* Sidebar */}
       <aside className="w-full md:w-64 border-b md:border-r border-border bg-card/50 flex flex-col z-10 shrink-0">
-        <div className="px-4 py-3 md:px-5 md:py-4 flex items-center gap-2.5">
-          <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shrink-0 font-bold text-white text-xs md:text-sm leading-none">
-            HR
+        <div className="px-4 py-3 md:p-6 flex items-center gap-3">
+          <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30 text-primary">
+            <Activity className="w-4 h-4 md:w-5 md:h-5" />
           </div>
-          <span className="font-semibold text-[13px] md:text-[14px] tracking-tight text-foreground whitespace-nowrap">
-            Hokireceh
+          <span className="font-display font-bold text-lg md:text-xl tracking-tight text-foreground">
+            Hokireceh<span className="text-primary">Pro</span>
           </span>
         </div>
 
