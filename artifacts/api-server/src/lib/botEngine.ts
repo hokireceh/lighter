@@ -335,10 +335,10 @@ async function executeLiveOrder(params: {
     // PostOnly (2): maker-only, rejected immediately if it would cross — no expiry needed
     // GoodTillTime (1): standard limit, stays in book until expiry
     lighterTimeInForce = orderKind === "post_only" ? 2 : 1;
-    // PostOnly orders don't use expiry (set to 0); GTT expiry in milliseconds (signer expects ms)
-    lighterOrderExpiry = orderKind === "post_only"
-      ? 0
-      : Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days from now, in milliseconds
+    // PostOnly orders: no expiry (0 = NilOrderExpiry)
+    // GTT orders: pass -1 = DEFAULT_28_DAY_ORDER_EXPIRY (Go signer computes internally)
+    // Never compute a raw timestamp here — the signer rejects any manually-calculated value
+    lighterOrderExpiry = orderKind === "post_only" ? 0 : -1;
   } else {
     const slippageFactor = side === "buy" ? 1.05 : 0.95;
     executionPrice = currentPrice.mul(slippageFactor);
@@ -608,10 +608,9 @@ async function executeBatchLiveOrders(params: {
     executionPrice = side === "buy" ? currentPrice.sub(offset) : currentPrice.add(offset);
     lighterOrderType = 0;
     lighterTimeInForce = orderKind === "post_only" ? 2 : 1; // PostOnly=2, GoodTillTime=1
-    // PostOnly = no expiry needed; GTT expiry in milliseconds (signer expects ms)
-    lighterOrderExpiry = orderKind === "post_only"
-      ? 0
-      : Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days from now, in milliseconds
+    // PostOnly orders: no expiry (0 = NilOrderExpiry)
+    // GTT orders: pass -1 = DEFAULT_28_DAY_ORDER_EXPIRY (Go signer computes internally)
+    lighterOrderExpiry = orderKind === "post_only" ? 0 : -1;
   } else {
     const slippageFactor = side === "buy" ? 1.05 : 0.95;
     executionPrice = currentPrice.mul(slippageFactor);
