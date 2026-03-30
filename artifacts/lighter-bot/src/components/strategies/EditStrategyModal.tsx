@@ -19,7 +19,7 @@ const dcaEditSchema = z.object({
   amountPerOrder: z.coerce.number().positive("Amount must be positive"),
   intervalMinutes: z.coerce.number().min(1, "Interval must be at least 1 minute"),
   side: z.enum(["buy", "sell"]),
-  orderType: z.enum(["market", "limit"]),
+  orderType: z.enum(["market", "limit", "post_only"]),
   limitPriceOffset: z.coerce.number().min(0).optional(),
 });
 
@@ -39,13 +39,19 @@ const gridEditSchema = z.object({
   gridLevels: z.coerce.number().min(2).max(100),
   amountPerGrid: z.coerce.number().positive("Amount must be positive"),
   mode: z.enum(["neutral", "long", "short"]),
-  orderType: z.enum(["market", "limit"]),
+  orderType: z.enum(["market", "limit", "post_only"]),
   limitPriceOffset: z.coerce.number().min(0).optional(),
   stopLoss: optionalPositiveNumber,
   takeProfit: optionalPositiveNumber,
 }).refine(data => data.upperPrice > data.lowerPrice, {
   message: "Upper price must be greater than lower price",
   path: ["upperPrice"],
+}).refine(data => !data.stopLoss || data.stopLoss < data.lowerPrice, {
+  message: "Stop Loss must be below Lower Price (otherwise bot stops immediately)",
+  path: ["stopLoss"],
+}).refine(data => !data.takeProfit || data.takeProfit > data.upperPrice, {
+  message: "Take Profit must be above Upper Price (otherwise bot stops immediately)",
+  path: ["takeProfit"],
 });
 
 type DcaEditData = z.infer<typeof dcaEditSchema>;
@@ -257,14 +263,15 @@ function DcaEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =>
           <Select value={watchOrderType} onValueChange={(v: any) => form.setValue("orderType", v)}>
             <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
             <SelectContent>
+              <SelectItem value="post_only">Post-Only (Maker Only) ⭐⭐</SelectItem>
+              <SelectItem value="limit">Limit (Maker/Taker) ⭐</SelectItem>
               <SelectItem value="market">Market (Taker)</SelectItem>
-              <SelectItem value="limit">Limit (Maker)</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
-      {watchOrderType === "limit" && (
+      {(watchOrderType === "limit" || watchOrderType === "post_only") && (
         <div className="space-y-2">
           <Label>
             Limit Price Offset (USDC)
@@ -441,22 +448,26 @@ function GridEditForm({ strategy, onClose }: { strategy: Strategy; onClose: () =
           <Select value={watchOrderType} onValueChange={(v: any) => form.setValue("orderType", v)}>
             <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="limit">Limit (Maker) ⭐</SelectItem>
+              <SelectItem value="post_only">Post-Only (Maker Only) ⭐⭐</SelectItem>
+              <SelectItem value="limit">Limit (Maker/Taker) ⭐</SelectItem>
               <SelectItem value="market">Market (Taker)</SelectItem>
             </SelectContent>
           </Select>
+          {watchOrderType === "post_only" && (
+            <p className="text-xs text-muted-foreground">Ditolak exchange jika langsung match — jaminan maker only, tidak ada taker fee.</p>
+          )}
         </div>
       </div>
 
-      {watchOrderType === "limit" && (
+      {(watchOrderType === "limit" || watchOrderType === "post_only") && (
         <div className="space-y-2">
           <Label>
             Limit Price Offset (USDC)
-            <span className="ml-1.5 text-xs text-muted-foreground">— offset from crossing price</span>
+            <span className="ml-1.5 text-xs text-muted-foreground">— offset dari harga pasar saat eksekusi</span>
           </Label>
           <Input type="number" step="0.01" {...form.register("limitPriceOffset")} className="bg-background font-mono" />
           <p className="text-xs text-muted-foreground">
-            Grid buy: places <strong>below</strong> crossing price. Grid sell: places <strong>above</strong>. Set 0 for exact level price.
+            Buy: order di <strong>bawah</strong> harga pasar. Sell: di <strong>atas</strong> harga pasar. Set 0 untuk tepat di harga pasar.
           </p>
         </div>
       )}

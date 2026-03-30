@@ -197,7 +197,7 @@ async function executeDcaOrder(strategy: typeof strategiesTable.$inferSelect) {
     amountPerOrder: number;
     intervalMinutes: number;
     side: "buy" | "sell";
-    orderType: "market" | "limit";
+    orderType: "market" | "limit" | "post_only";
     maxOrders?: number;
     limitPriceOffset?: number;
   };
@@ -280,7 +280,7 @@ async function executeLiveOrder(params: {
   size: Decimal;
   currentPrice: Decimal;
   network: "mainnet" | "testnet";
-  orderKind?: "market" | "limit";
+  orderKind?: "market" | "limit" | "post_only";
   limitPriceOffset?: number;
 }) {
   const { userId, strategy, botConfig, side, size, currentPrice, network } = params;
@@ -317,19 +317,21 @@ async function executeLiveOrder(params: {
   // ─────────────────────────────────────────────────────────────────────────
 
   // Market order: add 5% slippage buffer (worst-case fill price)
-  // Limit order: offset from current price (buy below, sell above)
+  // Limit/PostOnly order: offset from current price (buy below, sell above)
   let executionPrice: Decimal;
   let lighterOrderType: number;
   let lighterTimeInForce: number;
   let lighterOrderExpiry: number;
 
-  if (orderKind === "limit") {
+  if (orderKind === "limit" || orderKind === "post_only") {
     const offset = new Decimal(limitPriceOffset);
     executionPrice = side === "buy"
       ? currentPrice.sub(offset)
       : currentPrice.add(offset);
     lighterOrderType = 0;   // LimitOrder
-    lighterTimeInForce = 1; // GoodTillTime
+    // PostOnly (2): rejected by exchange if it would immediately cross (maker-only guarantee)
+    // GoodTillTime (1): standard limit, can fill as taker if crossing
+    lighterTimeInForce = orderKind === "post_only" ? 2 : 1;
     lighterOrderExpiry = Math.floor(Date.now() / 1000) + 28 * 24 * 60 * 60; // 28 days from now (seconds)
   } else {
     const slippageFactor = side === "buy" ? 1.05 : 0.95;
@@ -530,7 +532,7 @@ async function executeBatchLiveOrders(params: {
   currentPrice: Decimal;
   network: "mainnet" | "testnet";
   orderCount: number;
-  orderKind?: "market" | "limit";
+  orderKind?: "market" | "limit" | "post_only";
   limitPriceOffset?: number;
 }): Promise<void> {
   const { userId, strategy, botConfig, side, size, currentPrice, network, orderCount } = params;
@@ -591,11 +593,11 @@ async function executeBatchLiveOrders(params: {
   let lighterTimeInForce: number;
   let lighterOrderExpiry: number;
 
-  if (orderKind === "limit") {
+  if (orderKind === "limit" || orderKind === "post_only") {
     const offset = new Decimal(limitPriceOffset);
     executionPrice = side === "buy" ? currentPrice.sub(offset) : currentPrice.add(offset);
     lighterOrderType = 0;
-    lighterTimeInForce = 1;
+    lighterTimeInForce = orderKind === "post_only" ? 2 : 1; // PostOnly=2, GoodTillTime=1
     lighterOrderExpiry = Math.floor(Date.now() / 1000) + 28 * 24 * 60 * 60;
   } else {
     const slippageFactor = side === "buy" ? 1.05 : 0.95;
@@ -711,7 +713,7 @@ async function executeGridCheck(strategy: typeof strategiesTable.$inferSelect) {
     mode: "neutral" | "long" | "short";
     stopLoss?: number | null;
     takeProfit?: number | null;
-    orderType?: "market" | "limit";
+    orderType?: "market" | "limit" | "post_only";
     limitPriceOffset?: number;
   };
 

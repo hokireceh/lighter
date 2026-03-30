@@ -22,7 +22,7 @@ const dcaSchema = z.object({
   amountPerOrder: z.coerce.number().positive("Amount must be positive"),
   intervalMinutes: z.coerce.number().min(1, "Interval must be at least 1 minute"),
   side: z.enum(["buy", "sell"]),
-  orderType: z.enum(["market", "limit"]),
+  orderType: z.enum(["market", "limit", "post_only"]),
   limitPriceOffset: z.coerce.number().min(0).optional(),
 });
 
@@ -43,13 +43,19 @@ const gridSchema = z.object({
   gridLevels: z.coerce.number().min(2).max(100),
   amountPerGrid: z.coerce.number().positive("Amount must be positive"),
   mode: z.enum(["neutral", "long", "short"]),
-  orderType: z.enum(["market", "limit"]),
+  orderType: z.enum(["market", "limit", "post_only"]),
   limitPriceOffset: z.coerce.number().min(0).optional(),
   stopLoss: optionalPositiveNumber,
   takeProfit: optionalPositiveNumber,
 }).refine(data => data.upperPrice > data.lowerPrice, {
   message: "Upper price must be greater than lower price",
   path: ["upperPrice"],
+}).refine(data => !data.stopLoss || data.stopLoss < data.lowerPrice, {
+  message: "Stop Loss must be below Lower Price (otherwise bot stops immediately)",
+  path: ["stopLoss"],
+}).refine(data => !data.takeProfit || data.takeProfit > data.upperPrice, {
+  message: "Take Profit must be above Upper Price (otherwise bot stops immediately)",
+  path: ["takeProfit"],
 });
 
 type DcaFormData = z.infer<typeof dcaSchema>;
@@ -309,25 +315,26 @@ function DcaForm({ markets, onSuccess, onCancel }: DcaFormProps) {
         </div>
         <div className="space-y-2">
           <Label>Order Type</Label>
-          <Select onValueChange={(v: any) => form.setValue("orderType", v)} value={form.watch("orderType") || "market"}>
+          <Select onValueChange={(v: any) => form.setValue("orderType", v)} value={form.watch("orderType") || "limit"}>
             <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
             <SelectContent>
+              <SelectItem value="post_only">Post-Only (Maker Only) ⭐⭐</SelectItem>
+              <SelectItem value="limit">Limit (Maker/Taker) ⭐</SelectItem>
               <SelectItem value="market">Market (Taker)</SelectItem>
-              <SelectItem value="limit">Limit (Maker)</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
-      {watchOrderType === "limit" && (
+      {(watchOrderType === "limit" || watchOrderType === "post_only") && (
         <div className="space-y-2">
           <Label>
             Limit Price Offset (USDC)
-            <span className="ml-1.5 text-xs text-muted-foreground">— how far from market price to place limit order</span>
+            <span className="ml-1.5 text-xs text-muted-foreground">— offset dari harga pasar saat eksekusi</span>
           </Label>
           <Input type="number" step="0.01" {...form.register("limitPriceOffset")} placeholder="e.g. 10" className="bg-background font-mono" />
           <p className="text-xs text-muted-foreground">
-            Buy: places order <strong>below</strong> market price by this amount. Sell: places <strong>above</strong>.
+            Buy: order di <strong>bawah</strong> harga pasar. Sell: di <strong>atas</strong> harga pasar.
           </p>
           {form.formState.errors.limitPriceOffset && <p className="text-xs text-destructive">{form.formState.errors.limitPriceOffset.message}</p>}
         </div>
@@ -493,25 +500,29 @@ function GridForm({ markets, onSuccess, onCancel }: GridFormProps) {
         </div>
         <div className="space-y-2">
           <Label>Order Type</Label>
-          <Select onValueChange={(v: any) => form.setValue("orderType", v)} value={form.watch("orderType") || "limit"}>
+          <Select onValueChange={(v: any) => form.setValue("orderType", v)} value={form.watch("orderType") || "post_only"}>
             <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="limit">Limit (Maker) ⭐</SelectItem>
+              <SelectItem value="post_only">Post-Only (Maker Only) ⭐⭐</SelectItem>
+              <SelectItem value="limit">Limit (Maker/Taker) ⭐</SelectItem>
               <SelectItem value="market">Market (Taker)</SelectItem>
             </SelectContent>
           </Select>
+          {form.watch("orderType") === "post_only" && (
+            <p className="text-xs text-muted-foreground">Ditolak exchange jika langsung match — jaminan maker only, tidak ada taker fee.</p>
+          )}
         </div>
       </div>
 
-      {watchOrderType === "limit" && (
+      {(watchOrderType === "limit" || watchOrderType === "post_only") && (
         <div className="space-y-2">
           <Label>
             Limit Price Offset (USDC)
-            <span className="ml-1.5 text-xs text-muted-foreground">— offset from crossing price</span>
+            <span className="ml-1.5 text-xs text-muted-foreground">— offset dari harga pasar saat eksekusi</span>
           </Label>
           <Input type="number" step="0.01" {...form.register("limitPriceOffset")} placeholder="e.g. 5" className="bg-background font-mono" />
           <p className="text-xs text-muted-foreground">
-            Grid buy: places <strong>below</strong> crossing price. Grid sell: places <strong>above</strong>. Set 0 for exact grid level price.
+            Buy: order ditempatkan <strong>di bawah</strong> harga pasar. Sell: <strong>di atas</strong>. Set 0 untuk tepat di harga pasar.
           </p>
         </div>
       )}
