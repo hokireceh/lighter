@@ -12,4 +12,5 @@ export type DcaConfigOrderType =
 export const DcaConfigOrderType = {
   market: "market",
   limit: "limit",
+  post_only: "post_only",
 } as const;

@@ -12,4 +12,5 @@ export type GridConfigOrderType =
 export const GridConfigOrderType = {
   market: "market",
   limit: "limit",
+  post_only: "post_only",
 } as const;
