@@ -122,6 +122,7 @@ export interface MarketContext {
   priceChangePct24h: number;
   minBaseAmount: number;
   minQuoteAmount: number;
+  availableBalance?: number;  // USDC available in user's account — diambil realtime dari Lighter
 }
 
 export interface DCAParams {
@@ -182,9 +183,14 @@ Min Order Size: ${market.minBaseAmount} ${market.symbol.split("-")[0]} / $${mark
 
 Strategy Type: ${strategyType.toUpperCase()}
 Execution: Standard Account (zero maker/taker fees)
-${strategyType === "grid"
-  ? "Capital Available: $1000 USDC. Provide a well-balanced grid setup with appropriate stop-loss."
-  : "Capital Available: $1000 USDC. Provide a conservative DCA plan with stale order management."}
+${(() => {
+  const capital = market.availableBalance !== undefined
+    ? `$${market.availableBalance.toFixed(2)} USDC (user's real available balance)`
+    : "$1000 USDC (estimated)";
+  return strategyType === "grid"
+    ? `Capital Available: ${capital}. Size amountPerGrid so all grid levels can be filled simultaneously. Provide appropriate stop-loss.`
+    : `Capital Available: ${capital}. Size amountPerOrder conservatively (1-5% of capital per order). Include stale order management.`;
+})()}
 
 Return ONLY valid JSON matching the specification. Ensure strategy and appropriate params are set, others null.`;
 }
