@@ -178,7 +178,9 @@ Current Price: $${market.lastPrice.toFixed(4)}
 24h Volatility: ${volatility}%
 24h Volume: $${market.volume24h.toFixed(0)} (${volumeContext})
 24h Price Change: ${market.priceChangePct24h > 0 ? "+" : ""}${market.priceChangePct24h.toFixed(2)}%
-Min Order Size: ${market.minBaseAmount} ${market.symbol.split("-")[0]} / $${market.minQuoteAmount} USDC
+Min Order Size (HARD LIMIT — MUST NOT GO BELOW): ${market.minBaseAmount} ${market.symbol.split("-")[0]} base OR $${market.minQuoteAmount} USDC quote, whichever is LARGER.
+At current price $${market.lastPrice.toFixed(4)}, the minimum order in USDC = max($${market.minQuoteAmount}, ${market.minBaseAmount} × $${market.lastPrice.toFixed(4)}) = $${Math.max(market.minQuoteAmount, market.minBaseAmount * market.lastPrice).toFixed(2)} USDC.
+You MUST set amountPerGrid (grid) or amountPerOrder (DCA) to AT LEAST 1.5× this value = $${(Math.max(market.minQuoteAmount, market.minBaseAmount * market.lastPrice) * 1.5).toFixed(2)} USDC. Orders below minimum are silently skipped by the exchange.
 
 Strategy Type: ${strategyType.toUpperCase()}
 Execution: Standard Account (zero maker/taker fees)
@@ -187,8 +189,8 @@ ${(() => {
     ? `$${market.availableBalance.toFixed(2)} USDC (user's real available balance)`
     : "$1000 USDC (estimated)";
   return strategyType === "grid"
-    ? `Capital Available: ${capital}. Size amountPerGrid so all grid levels can be filled simultaneously. Provide appropriate stop-loss.`
-    : `Capital Available: ${capital}. Size amountPerOrder conservatively (1-5% of capital per order). Include stale order management.`;
+    ? `Capital Available: ${capital}. Size amountPerGrid so all grid levels can be filled simultaneously, AND above the minimum stated above. Provide appropriate stop-loss.`
+    : `Capital Available: ${capital}. Size amountPerOrder conservatively (1-5% of capital per order), AND above the minimum stated above.`;
 })()}
 
 Return ONLY valid JSON matching the specification. Ensure strategy and appropriate params are set, others null.`;
@@ -278,10 +280,20 @@ export async function analyzeMarketForStrategy(
     throw new Error("AI response missing both dca_params and grid_params");
   }
 
+  // Safety clamp: enforce exchange minimums regardless of what the AI returns.
+  // Uses 1.5× safety margin to match the bot engine's skip-order threshold.
+  // max(minQuoteAmount, minBaseAmount × lastPrice) gives the effective USDC minimum.
+  const effectiveMinUsdc = Math.ceil(
+    Math.max(market.minQuoteAmount, market.minBaseAmount * market.lastPrice) * 1.5 * 100
+  ) / 100;
+
+  const clampAmount = (raw: number | undefined, fallback: number): number =>
+    Math.max(raw ?? fallback, effectiveMinUsdc);
+
   return {
     strategy: hasDCA ? "dca" : "grid",
     dca_params: hasDCA ? {
-      amountPerOrder: parsed.dca_params.amountPerOrder ?? 100,
+      amountPerOrder: clampAmount(parsed.dca_params.amountPerOrder, 100),
       intervalMinutes: parsed.dca_params.intervalMinutes ?? 60,
       side: parsed.dca_params.side ?? "buy",
       orderType: parsed.dca_params.orderType ?? "limit",
@@ -291,7 +303,7 @@ export async function analyzeMarketForStrategy(
       lowerPrice: parsed.grid_params.lowerPrice ?? market.lastPrice * 0.95,
       upperPrice: parsed.grid_params.upperPrice ?? market.lastPrice * 1.05,
       gridLevels: parsed.grid_params.gridLevels ?? 10,
-      amountPerGrid: parsed.grid_params.amountPerGrid ?? 100,
+      amountPerGrid: clampAmount(parsed.grid_params.amountPerGrid, 100),
       mode: parsed.grid_params.mode ?? "neutral",
       orderType: parsed.grid_params.orderType ?? "post_only",
       limitPriceOffset: parsed.grid_params.limitPriceOffset ?? 0.1,
