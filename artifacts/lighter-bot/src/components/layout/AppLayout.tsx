@@ -9,7 +9,8 @@ import {
   Terminal,
   Activity,
   LogOut,
-  User
+  User,
+  Sparkles
 } from "lucide-react";
 import { useGetBotConfig } from "@workspace/api-client-react";
 import { useAuth } from "@/context/AuthContext";
@@ -26,6 +27,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
     { href: "/strategies", label: "Strategies", icon: Bot },
     { href: "/trades", label: "Trades", icon: History },
     { href: "/logs", label: "Logs", icon: Terminal },
+    { href: "/ai-advisor", label: "AI Advisor", icon: Sparkles },
     { href: "/settings", label: "Settings", icon: Settings },
   ];
 

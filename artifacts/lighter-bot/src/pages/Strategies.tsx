@@ -168,7 +168,33 @@ export default function Strategies() {
 
       {isLoading ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {[1, 2, 3].map(i => <Card key={i} className="glass-panel h-64 animate-pulse bg-muted/20" />)}
+          {[1, 2, 3].map(i => (
+            <Card key={i} className="glass-panel flex flex-col overflow-hidden">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="space-y-2 flex-1">
+                    <div className="h-5 w-32 bg-primary/10 animate-pulse rounded" />
+                    <div className="h-4 w-20 bg-muted animate-pulse rounded" />
+                  </div>
+                  <div className="h-6 w-14 bg-muted animate-pulse rounded-full" />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3 flex-1">
+                <div className="h-4 w-full bg-muted animate-pulse rounded" />
+                <div className="h-4 w-3/4 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-5/6 bg-muted animate-pulse rounded" />
+                <div className="grid grid-cols-2 gap-2 mt-4">
+                  <div className="h-12 bg-muted/50 animate-pulse rounded-lg" />
+                  <div className="h-12 bg-muted/50 animate-pulse rounded-lg" />
+                </div>
+              </CardContent>
+              <CardFooter className="flex gap-2 pt-3 border-t border-border/50">
+                <div className="h-8 flex-1 bg-muted animate-pulse rounded" />
+                <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+                <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+              </CardFooter>
+            </Card>
+          ))}
         </div>
       ) : !data?.strategies.length ? (
         <div className="text-center py-20 bg-card rounded-2xl border border-border flex flex-col items-center">

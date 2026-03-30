@@ -120,13 +120,10 @@ function AIInsightCard({ result }: { result: AIResult }) {
 }
 
 async function fetchAIAnalysis(strategyType: "dca" | "grid", marketIndex: number) {
-  const token = localStorage.getItem("lb_token") ?? "";
   const res = await fetch("/api/ai/analyze", {
     method: "POST",
-    headers: {
-      "content-type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    credentials: "include",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({ strategyType, marketIndex }),
   });
   if (!res.ok) {

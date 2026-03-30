@@ -15,6 +15,7 @@ const Strategies = lazy(() => import("@/pages/Strategies"));
 const Trades = lazy(() => import("@/pages/Trades"));
 const Logs = lazy(() => import("@/pages/Logs"));
 const Settings = lazy(() => import("@/pages/Settings"));
+const AIAdvisor = lazy(() => import("@/pages/AIAdvisor"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const AppLayout = lazy(() =>
   import("@/components/layout/AppLayout").then((m) => ({ default: m.AppLayout }))
@@ -54,6 +55,7 @@ function AuthenticatedRouter() {
           <Route path="/trades" component={Trades} />
           <Route path="/logs" component={Logs} />
           <Route path="/settings" component={Settings} />
+          <Route path="/ai-advisor" component={AIAdvisor} />
           <Route component={NotFound} />
         </Switch>
       </AppLayout>

@@ -3,18 +3,26 @@ import { db } from "@workspace/db";
 import { usersTable } from "@workspace/db";
 import { eq, and, gt } from "drizzle-orm";
 
+const COOKIE_NAME = "lb_session";
+
 export interface AuthRequest extends Request {
   userId?: number;
   userTelegramId?: string;
 }
 
-export async function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
+function resolvePassword(req: AuthRequest): string | null {
   const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Unauthorized" });
+  if (authHeader?.startsWith("Bearer ")) {
+    const t = authHeader.slice(7).trim();
+    if (t) return t;
   }
+  const cookie = (req as any).cookies?.[COOKIE_NAME];
+  if (typeof cookie === "string" && cookie.trim()) return cookie.trim();
+  return null;
+}
 
-  const password = authHeader.slice(7).trim();
+export async function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
+  const password = resolvePassword(req);
   if (!password) return res.status(401).json({ error: "Unauthorized" });
 
   const adminPassword = process.env.ADMIN_PASSWORD;

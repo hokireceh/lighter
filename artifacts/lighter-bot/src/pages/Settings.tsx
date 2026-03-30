@@ -100,9 +100,8 @@ export default function Settings() {
     setIsLookingUp(true);
     setDetectedBalance(null);
     try {
-      const token = localStorage.getItem("lb_token");
       const res = await fetch(`/api/config/lookup-account?l1Address=${encodeURIComponent(l1Address)}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       });
       if (!res.ok) {
         const err = await res.json();
@@ -125,10 +124,9 @@ export default function Settings() {
   const handleTestNotification = async () => {
     setIsTesting(true);
     try {
-      const token = localStorage.getItem("lb_token");
       const res = await fetch("/api/config/test-notification", {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       });
       const data = await res.json();
       if (data.ok) {
@@ -154,7 +152,24 @@ export default function Settings() {
       </header>
 
       {isLoading ? (
-        <Card className="glass-panel h-96 animate-pulse bg-muted/20" />
+        <div className="space-y-6">
+          {[1, 2].map(i => (
+            <Card key={i} className="glass-panel border-border/50">
+              <CardHeader>
+                <div className="h-5 w-40 bg-primary/10 animate-pulse rounded" />
+                <div className="h-4 w-64 bg-muted animate-pulse rounded mt-1" />
+              </CardHeader>
+              <CardContent className="space-y-5">
+                {[1, 2, 3].map(j => (
+                  <div key={j} className="space-y-2">
+                    <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+                    <div className="h-10 w-full bg-muted/50 animate-pulse rounded-lg" />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       ) : (
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <Card className="glass-panel border-border/50">

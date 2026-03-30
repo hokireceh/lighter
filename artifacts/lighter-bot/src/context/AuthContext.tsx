@@ -1,7 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { setAuthTokenGetter } from "@workspace/api-client-react";
-
-const STORAGE_KEY = "lb_token";
 
 export interface AuthUser {
   id: number;
@@ -27,24 +24,10 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [token, setToken] = useState<string | null>(null);
 
-  const applyToken = useCallback((t: string | null) => {
-    setToken(t);
-    if (t) {
-      localStorage.setItem(STORAGE_KEY, t);
-      setAuthTokenGetter(() => t);
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
-      setAuthTokenGetter(null);
-    }
-  }, []);
-
-  const validateToken = useCallback(async (t: string): Promise<AuthUser | null> => {
+  const fetchMe = useCallback(async (): Promise<AuthUser | null> => {
     try {
-      const res = await fetch("/api/auth/me", {
-        headers: { Authorization: `Bearer ${t}` },
-      });
+      const res = await fetch("/api/auth/me", { credentials: "include" });
       if (!res.ok) return null;
       return await res.json() as AuthUser;
     } catch {
@@ -53,22 +36,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) {
-      setIsLoading(false);
-      return;
-    }
-    applyToken(stored);
     const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000));
-    Promise.race([validateToken(stored), timeout]).then((u) => {
-      if (u) {
-        setUser(u);
-      } else {
-        applyToken(null);
-      }
+    Promise.race([fetchMe(), timeout]).then((u) => {
+      setUser(u);
       setIsLoading(false);
     }).catch(() => {
-      applyToken(null);
       setIsLoading(false);
     });
   }, []);
@@ -77,23 +49,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const trimmed = password.trim().toUpperCase();
     if (!trimmed) return { success: false, error: "Password tidak boleh kosong" };
 
-    const validUser = await validateToken(trimmed);
-    if (!validUser) {
-      return { success: false, error: "Password salah atau langganan sudah habis" };
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        credentials: "include",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ password: trimmed }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        return { success: false, error: data.error ?? "Password salah atau langganan sudah habis" };
+      }
+      const userData = await res.json() as AuthUser;
+      setUser(userData);
+      return { success: true };
+    } catch {
+      return { success: false, error: "Gagal menghubungi server" };
     }
+  }, []);
 
-    applyToken(trimmed);
-    setUser(validUser);
-    return { success: true };
-  }, [applyToken, validateToken]);
-
-  const logout = useCallback(() => {
-    applyToken(null);
+  const logout = useCallback(async () => {
+    await fetch("/api/auth/logout", { method: "POST", credentials: "include" }).catch(() => {});
     setUser(null);
-  }, [applyToken]);
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, logout, token }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, logout, token: null }}>
       {children}
     </AuthContext.Provider>
   );

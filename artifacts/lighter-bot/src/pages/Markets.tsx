@@ -293,10 +293,24 @@ export default function Markets() {
 
   if (loading) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 400, flexDirection: "column", gap: 16 }}>
-        <div style={{ width: 40, height: 40, border: "3px solid #1e1e2e", borderTop: "3px solid #6366f1", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-        <span style={{ color: "#64748b", fontSize: 14 }}>Loading markets from Lighter.xyz...</span>
+      <div className="space-y-6 animate-in fade-in duration-500">
+        <header>
+          <div className="h-9 w-48 bg-primary/10 animate-pulse rounded-lg" />
+          <div className="h-4 w-64 bg-muted animate-pulse rounded mt-2" />
+        </header>
+        <div className="h-10 w-full bg-muted/50 animate-pulse rounded-xl" />
+        <div className="rounded-xl border border-border/50 overflow-hidden">
+          <div className="h-11 bg-muted/30 animate-pulse" />
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="flex items-center gap-4 px-4 py-3 border-t border-border/30">
+              <div className="h-4 w-28 bg-muted animate-pulse rounded" />
+              <div className="h-4 w-16 bg-muted animate-pulse rounded ml-auto" />
+              <div className="h-4 w-20 bg-muted animate-pulse rounded" />
+              <div className="h-4 w-16 bg-muted animate-pulse rounded" />
+              <div className="h-6 w-24 bg-muted/50 animate-pulse rounded" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
