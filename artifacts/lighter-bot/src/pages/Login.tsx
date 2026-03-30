@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, Bot, Lock } from "lucide-react";
+import { AlertCircle, Layers, Lock } from "lucide-react";
 
 export default function Login() {
   const { login } = useAuth();
@@ -26,14 +26,17 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-6">
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-3">
           <div className="flex justify-center">
-            <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <Bot className="h-9 w-9 text-primary" />
+            <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-[0_0_32px_rgba(var(--primary),0.5)]">
+              <Layers className="h-9 w-9 text-primary-foreground" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">LighterBot</h1>
-          <p className="text-muted-foreground text-sm">Automated Trading Bot untuk Lighter.xyz</p>
+          <div className="space-y-0.5">
+            <h1 className="text-3xl font-bold tracking-tight">Hokireceh</h1>
+            <p className="text-xs font-semibold tracking-[0.22em] text-primary uppercase">.projects</p>
+          </div>
+          <p className="text-muted-foreground text-sm">Platform Trading Bot Multi-DEX</p>
         </div>
 
         <Card>

@@ -7,7 +7,7 @@ import {
   History, 
   Settings, 
   Terminal,
-  Activity,
+  Layers,
   LogOut,
   User,
   Sparkles
@@ -37,13 +37,18 @@ export function AppLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-background flex flex-col md:flex-row font-sans">
       {/* Sidebar */}
       <aside className="w-full md:w-64 border-b md:border-r border-border bg-card/50 flex flex-col z-10 shrink-0">
-        <div className="px-4 py-3 md:p-6 flex items-center gap-3">
-          <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30 text-primary">
-            <Activity className="w-4 h-4 md:w-5 md:h-5" />
+        <div className="px-4 py-3 md:px-5 md:py-4 flex items-center gap-3">
+          <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-primary flex items-center justify-center shadow-[0_0_16px_rgba(var(--primary),0.45)] shrink-0">
+            <Layers className="w-4 h-4 md:w-[18px] md:h-[18px] text-primary-foreground" />
           </div>
-          <span className="font-display font-bold text-lg md:text-xl tracking-tight text-foreground">
-            Lighter<span className="text-primary">Bot</span>
-          </span>
+          <div className="flex flex-col leading-none min-w-0">
+            <span className="font-bold text-sm md:text-[15px] tracking-tight text-foreground whitespace-nowrap">
+              Hokireceh
+            </span>
+            <span className="text-[10px] md:text-[11px] font-semibold tracking-[0.18em] text-primary uppercase mt-0.5">
+              .projects
+            </span>
+          </div>
         </div>
 
         <nav className="flex-1 px-2 md:px-4 py-1 md:py-2 overflow-x-auto md:overflow-visible flex md:flex-col md:space-y-1">
