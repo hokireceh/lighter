@@ -250,6 +250,13 @@ async function executeDcaOrder(strategy: typeof strategiesTable.$inferSelect) {
       orderHash: `paper_${Date.now()}`,
     });
     await updateStrategyStatsAtomic(strategy.id, config.side, size, currentPrice);
+    if (userId !== null) {
+      const notif = await getNotificationConfig(userId);
+      if ((config.side === "buy" && notif.notifyOnBuy) || (config.side === "sell" && notif.notifyOnSell)) {
+        const emoji = config.side === "buy" ? "🟢" : "🔴";
+        await notifyUser(userId, `${emoji} *Paper ${config.side.toUpperCase()}*\n${strategy.name}: ${size.toFixed(6)} ${strategy.marketSymbol} @ $${currentPrice.toFixed(2)}`);
+      }
+    }
   } else {
     await executeLiveOrder({
       userId,
@@ -1192,11 +1199,19 @@ export async function pollPendingTrades() {
           logger.warn({ tradeId: trade.id }, "Failed to update strategy stats after fill");
         }
 
-        // Notify user via Telegram
-        await notifyUser(
-          trade.userId ?? null,
-          `✅ Order filled!\n${trade.side.toUpperCase()} ${trade.size} ${trade.marketSymbol} @ $${trade.price}`
-        );
+        // Notify user via Telegram (respect notifyOnBuy / notifyOnSell settings)
+        if (trade.userId !== null) {
+          const notif = await getNotificationConfig(trade.userId).catch(() => null);
+          const shouldNotify = trade.side === "buy"
+            ? (notif?.notifyOnBuy ?? true)
+            : (notif?.notifyOnSell ?? true);
+          if (shouldNotify) {
+            await notifyUser(
+              trade.userId,
+              `✅ *Order Filled*\n${trade.side.toUpperCase()} ${trade.size} ${trade.marketSymbol} @ $${parseFloat(trade.price).toFixed(2)}`
+            );
+          }
+        }
 
         logger.info({ tradeId: trade.id, orderHash, txStatus }, "Trade confirmed as filled");
 

@@ -293,7 +293,10 @@ export async function sendMessageToUser(
 ): Promise<{ ok: boolean; error?: string }> {
   if (!notifyBotToken) return { ok: false, error: "Bot token not configured" };
   if (!chatId) return { ok: false, error: "Chat ID not configured" };
-  const telegram = new Telegraf(notifyBotToken).telegram;
+  // Force IPv4 — same as the main bot. VPS servers sometimes have broken IPv6
+  // connectivity to Telegram's API which causes silent send failures.
+  const ipv4Agent = new https.Agent({ family: 4 });
+  const telegram = new Telegraf(notifyBotToken, { telegram: { agent: ipv4Agent } }).telegram;
   try {
     await telegram.sendMessage(chatId, text, { parse_mode: "Markdown" });
     return { ok: true };
