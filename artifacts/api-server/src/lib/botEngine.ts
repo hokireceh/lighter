@@ -1118,7 +1118,28 @@ export async function restoreRunningBots() {
 
   for (const strategy of strategies) {
     logger.info({ strategyId: strategy.id }, "Restoring running bot");
-    await startBot(strategy.id);
+    try {
+      await startBot(strategy.id);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      const isValidationFail = message.startsWith("BOT_VALIDATION_FAILED:");
+
+      logger.error({ strategyId: strategy.id, err }, "Failed to restore bot");
+
+      // Mark as stopped in DB so it won't be retried on next restart
+      await db
+        .update(strategiesTable)
+        .set({ isRunning: false })
+        .where(eq(strategiesTable.id, strategy.id));
+
+      if (isValidationFail) {
+        // Log already written by startBot — no duplicate needed
+        logger.warn(
+          { strategyId: strategy.id, reason: message },
+          "Bot config outdated after restart — marked as stopped. User must review settings."
+        );
+      }
+    }
   }
 }
 
