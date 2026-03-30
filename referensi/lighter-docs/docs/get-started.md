@@ -59,6 +59,8 @@ The code for the signer can be found in the same repo, in the [signer\_client.py
 
 When signing a transaction, you may need to provide a nonce (number used once). A nonce needs to be incremented each time you sign something. You can get the next nonce that you need to use using the **TransactionApi’s** *next\_nonce* method or take care of incrementing it yourself. Note that each nonce is handled per **API\_KEY**.
 
+If you'd like to skip nonces, you can set the `SkipNonce`  (`skip_nonce` in the Python SDK) attribute (4th in `L2TxAttributes`) to `1`. If this attribute is not specified, we require `new_nonce = old_nonce + 1`. In any case, the following must hold true: `2^47-1 > new_nonce > old_nonce`.
+
 ## Signing a transaction
 
 One can sign a transaction using the **SignerClient’s** *sign\_create\_order*, *sign\_modify\_order*, *sign\_cancel\_order* and its other similar methods. For actually pushing the transaction, you need to call *send\_tx* or *send\_tx\_batch* using the **TransactionApi**. Here’s an [example](https://github.com/elliottech/lighter-python/blob/main/examples/send_batch_tx_http.py) that includes such an operation. Alternatively, you can use *create\_order*, which will send the tx as well. See more details [here](https://apidocs.lighter.xyz/docs/trading).

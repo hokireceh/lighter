@@ -6,16 +6,16 @@ Lighter API users can operate under a Standard or Premium account.
 
 Latency for maker & cancel orders is 0ms. Fee credits also count as staked LIT for the parameters described in the table.
 
-| Staked LIT | sendTx/sendTxBatch per minute | Maker/Taker Fee Discount | Maker Fee | Taker Fee | Taker Latency | Latency Improvement |
-| :--------- | :---------------------------- | :----------------------- | :-------- | :-------- | :------------ | :------------------ |
-| 0          | 4000                          |                          | 0.0040%   | 0.0280%   | 200 ms        |                     |
-| 1,000      | 5000                          | 2.5%                     | 0.0039%   | 0.0273%   | 195 ms        | 2.5%                |
-| 3,000      | 6000                          | 5%                       | 0.0038%   | 0.0266%   | 190 ms        | 5%                  |
-| 10,000     | 7000                          | 10%                      | 0.0036%   | 0.0252%   | 180 ms        | 10%                 |
-| 30,000     | 8000                          | 15%                      | 0.0034%   | 0.0238%   | 170 ms        | 15%                 |
-| 100,000    | 12000                         | 20%                      | 0.0032%   | 0.0224%   | 160 ms        | 20%                 |
-| 300,000    | 24000                         | 25%                      | 0.0030%   | 0.0210%   | 150 ms        | 25%                 |
-| 500,000    | 40000                         | 30%                      | 0.0028%   | 0.0196%   | 140 ms        | 30%                 |
+| Staked LIT | sendTx/sendTxBatch per minute | Maker/Taker Fee Discount | Maker Fee | Taker Fee | Taker Latency | Latency Improvement | Sub-accounts |
+| :--------- | :---------------------------- | :----------------------- | :-------- | :-------- | :------------ | :------------------ | :----------- |
+| 0          | 4000                          |                          | 0.0040%   | 0.0280%   | 200 ms        |                     | 8            |
+| 1,000      | 5000                          | 2.5%                     | 0.0039%   | 0.0273%   | 195 ms        | 2.5%                | 8            |
+| 3,000      | 6000                          | 5%                       | 0.0038%   | 0.0266%   | 190 ms        | 5%                  | 8            |
+| 10,000     | 7000                          | 10%                      | 0.0036%   | 0.0252%   | 180 ms        | 10%                 | 8            |
+| 30,000     | 8000                          | 15%                      | 0.0034%   | 0.0238%   | 170 ms        | 15%                 | 8            |
+| 100,000    | 12000                         | 20%                      | 0.0032%   | 0.0224%   | 160 ms        | 20%                 | 8            |
+| 300,000    | 24000                         | 25%                      | 0.0030%   | 0.0210%   | 150 ms        | 25%                 | 8            |
+| 500,000    | 40000                         | 30%                      | 0.0028%   | 0.0196%   | 140 ms        | 30%                 | 64           |
 
 #### Standard Account (Default) -- Suitable for retail and latency-insensitive traders.
 

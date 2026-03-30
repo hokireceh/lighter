@@ -412,6 +412,7 @@ The order book channel sends the new ask and bid orders for the given market in 
 ```json
 {
     "channel": "order_book:{MARKET_INDEX}",
+    "last_updated_at": INTEGER,
     "offset": INTEGER,
     "order_book": {
         "code": INTEGER,
@@ -429,7 +430,9 @@ The order book channel sends the new ask and bid orders for the given market in 
         ],
         "offset": INTEGER,
         "nonce": INTEGER,
-        "begin_nonce": INTEGER
+        "last_updated_at": INTEGER,
+        "begin_nonce": INTEGER,
+
     },
     "timestamp": INTEGER,
     "type": "update/order_book"
@@ -440,28 +443,27 @@ The order book channel sends the new ask and bid orders for the given market in 
 
 ```json
 {
-    "channel": "order_book:0",
-    "offset": 41692864,
-    "order_book": {
-        "code": 0,
-        "asks": [
-            {
-                "price": "3327.46",
-                "size": "29.0915"
-            }
-        ],
-        "bids": [
-            {
-                "price": "3338.80",
-                "size": "10.2898"
-            }
-        ],
-        "offset": 41692864,
-        "nonce": 4037957053,
-        "begin_nonce": 4037957034
-    },
-    "timestamp": 1766434222583,
-    "type": "update/order_book"
+   "channel":"order_book:0",
+   "last_updated_at":1774884082309144,
+   "offset":1558300,
+   "order_book":{
+      "code":0,
+      "asks":[
+         {
+            "price":"2064.54",
+            "size":"0.3285"
+         }
+      ],
+      "bids":[
+         
+      ],
+      "offset":1558300,
+      "nonce":9182390020,
+      "last_updated_at":1774884082309144,
+      "begin_nonce":9182389998
+   },
+   "timestamp":1774884082326,
+   "type":"update/order_book"
 }
 ```
 
@@ -490,6 +492,7 @@ Updates are triggered on every nonce update for a given market's order book.
 ```json
 {
    "channel": "ticker:{MARKET_INDEX}",
+   "last_updated_at": INTEGER,
    "nonce": INTEGER,
    "ticker":{
       "s": STRING,
@@ -500,7 +503,8 @@ Updates are triggered on every nonce update for a given market's order book.
       "b":{
          "price": STRING,
          "size": STRING
-      }
+      },
+      "last_updated_at":INTEGER
    },
    "timestamp": INTEGER,
    "type":"update/ticker"
@@ -511,21 +515,23 @@ Updates are triggered on every nonce update for a given market's order book.
 
 ```json
 {
-   "channel": "ticker:0",
-   "nonce": 6442420597,
+   "channel":"ticker:0",
+   "last_updated_at":1774883844921166,
+   "nonce":9182249734,
    "ticker":{
-      "s": "ETH",
+      "s":"ETH",
       "a":{
-         "price": "2150.10",
-         "size": "4.6512"
+         "price":"2064.48",
+         "size":"0.4950"
       },
       "b":{
-         "price": "2149.99",
-         "size": "17.4551"
-      }
+         "price":"2064.30",
+         "size":"1.0392"
+      },
+      "last_updated_at":1774883844921166
    },
-   "timestamp": 1773158679717,
-   "type": "update/ticker"
+   "timestamp":1774883844933,
+   "type":"update/ticker"
 }
 ```
 
@@ -1259,7 +1265,7 @@ The account orders channel sends data about the orders of an account on a certai
 
 ## Account All Trades
 
-The account all trades channel sends data about all the trades of an account.
+The account all trades channel sends data about all the trades of an account. `auth` is required, unless `account_id` pertains to a public pool.
 
 ```json
 {
