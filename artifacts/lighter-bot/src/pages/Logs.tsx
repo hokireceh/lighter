@@ -116,7 +116,7 @@ export default function Logs() {
                       onClick={() => handleCopyRow(log)}
                       title="Klik untuk menyalin baris ini"
                     >
-                      <span className="text-muted-foreground shrink-0 w-[4.5rem] sm:w-36 truncate">
+                      <span className="text-muted-foreground shrink-0 w-28 sm:w-48 whitespace-nowrap overflow-hidden text-ellipsis sm:overflow-visible">
                         [{formatWIBDateTime(log.createdAt)}]
                       </span>
                       <span className={`shrink-0 w-10 sm:w-16 uppercase ${colorClass}`}>
