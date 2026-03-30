@@ -125,6 +125,7 @@ export type DcaConfigOrderType =
 export const DcaConfigOrderType = {
   market: "market",
   limit: "limit",
+  post_only: "post_only",
 } as const;
 
 export interface DcaConfig {
@@ -155,6 +156,7 @@ export type GridConfigOrderType =
 export const GridConfigOrderType = {
   market: "market",
   limit: "limit",
+  post_only: "post_only",
 } as const;
 
 export interface GridConfig {
