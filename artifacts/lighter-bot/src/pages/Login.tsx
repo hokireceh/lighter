@@ -26,14 +26,20 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-6">
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-3">
           <div className="flex justify-center">
-            <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+            <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
               <Bot className="h-9 w-9 text-primary" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">Hokireceh<span className="text-primary">Pro</span></h1>
-          <p className="text-muted-foreground text-sm">Automated Trading Bot untuk Lighter.xyz</p>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Hokireceh</h1>
+            <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase mt-0.5">Projects</p>
+          </div>
+          <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 w-fit mx-auto">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            <span className="text-[11px] font-semibold text-emerald-500">Lighter DEX</span>
+          </div>
         </div>
 
         <Card>

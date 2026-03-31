@@ -37,13 +37,26 @@ export function AppLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-background flex flex-col md:flex-row font-sans">
       {/* Sidebar */}
       <aside className="w-full md:w-64 border-b md:border-r border-border bg-card/50 flex flex-col z-10 shrink-0">
-        <div className="px-4 py-3 md:p-6 flex items-center gap-3">
-          <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30 text-primary">
-            <Activity className="w-4 h-4 md:w-5 md:h-5" />
+        {/* Brand */}
+        <div className="px-4 py-3 md:px-5 md:py-4 md:border-b md:border-border/50">
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30 text-primary shrink-0">
+              <Activity className="w-4 h-4 md:w-[18px] md:h-[18px]" />
+            </div>
+            <div className="min-w-0">
+              <div className="font-bold text-base md:text-[15px] leading-tight tracking-tight text-foreground">
+                Hokireceh
+              </div>
+              <div className="hidden md:block text-[10px] text-muted-foreground font-medium tracking-widest uppercase leading-tight mt-0.5">
+                Projects
+              </div>
+            </div>
           </div>
-          <span className="font-display font-bold text-lg md:text-xl tracking-tight text-foreground">
-            Hokireceh<span className="text-primary">Pro</span>
-          </span>
+          {/* DEX Active Badge — desktop only */}
+          <div className="hidden md:flex items-center gap-1.5 mt-3 px-2.5 py-1.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 w-fit">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            <span className="text-[11px] font-semibold text-emerald-500 leading-none">Lighter DEX</span>
+          </div>
         </div>
 
         <nav className="flex-1 px-2 md:px-4 py-1 md:py-2 overflow-x-auto md:overflow-visible flex md:flex-col md:space-y-1">
