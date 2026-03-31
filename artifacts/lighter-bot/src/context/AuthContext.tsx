@@ -36,12 +36,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000));
-    Promise.race([fetchMe(), timeout]).then((u) => {
-      setUser(u);
-      setIsLoading(false);
-    }).catch(() => {
-      setIsLoading(false);
+    const params = new URLSearchParams(window.location.search);
+    const pk = params.get("pk");
+    const autoLogin = pk ? fetch("/api/auth/login", {
+      method: "POST", credentials: "include",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ password: pk }),
+    }).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null);
+
+    autoLogin.then(autoUser => {
+      const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000));
+      const source = autoUser ? Promise.resolve(autoUser) : Promise.race([fetchMe(), timeout]);
+      return source.then((u) => { setUser(u); setIsLoading(false); }).catch(() => setIsLoading(false));
     });
   }, []);
 
