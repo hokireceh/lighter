@@ -112,10 +112,10 @@ function PctChange({ value }: { value: number }) {
 }
 
 function formatListedAt(listedAt: string | null): string {
-  if (!listedAt) return "—";
+  if (!listedAt) return "";
   try {
     return new Date(listedAt).toLocaleString("sv-SE", { timeZone: "UTC" }).replace("T", " ");
-  } catch { return "—"; }
+  } catch { return ""; }
 }
 
 function age(listedAt: string | null): string {

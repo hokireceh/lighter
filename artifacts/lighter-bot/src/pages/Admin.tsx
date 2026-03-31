@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle, Users, Plus, RefreshCw, Trash2, Calendar, Shield, Monitor, CreditCard, Megaphone } from "lucide-react";
+import { AlertCircle, Users, Plus, RefreshCw, Trash2, Calendar, Shield, Monitor, CreditCard, Megaphone, TrendingUp } from "lucide-react";
 import { formatWIBDate } from "@/lib/utils";
 
 interface AdminUser {
@@ -194,24 +194,52 @@ export default function Admin() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <Card className="w-full max-w-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Shield className="h-5 w-5" /> Admin Panel</CardTitle>
-            <CardDescription>Masukkan password admin untuk melanjutkan.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleAdminLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label>Admin Password</Label>
-                <Input type="password" value={adminPassword} onChange={(e) => setAdminPassword(e.target.value)} autoFocus />
+        <div className="w-full max-w-sm space-y-6">
+          <div className="text-center space-y-3">
+            <div className="flex justify-center">
+              <div className="h-16 w-16 rounded-2xl flex items-center justify-center"
+                style={{ background: "linear-gradient(135deg, #0fd4aa 0%, #0aaa88 100%)" }}>
+                <TrendingUp className="h-9 w-9 text-white" strokeWidth={2.5} />
               </div>
-              {authError && (
-                <div className="flex items-center gap-2 text-destructive text-sm"><AlertCircle className="h-4 w-4" />{authError}</div>
-              )}
-              <Button type="submit" className="w-full">Login Admin</Button>
-            </form>
-          </CardContent>
-        </Card>
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Hokireceh</h1>
+              <p className="text-[10px] font-semibold text-muted-foreground tracking-[0.2em] uppercase mt-1">Projects</p>
+            </div>
+            <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-500/10 border border-emerald-500/25 w-fit mx-auto">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+              <span className="text-[11px] font-semibold text-emerald-400">Lighter DEX</span>
+            </div>
+          </div>
+
+          <Card className="w-full">
+            <CardHeader className="space-y-1 pb-4">
+              <CardTitle className="text-xl flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                Admin Panel
+              </CardTitle>
+              <CardDescription>Masukkan password admin untuk melanjutkan.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleAdminLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Admin Password</Label>
+                  <Input type="password" value={adminPassword} onChange={(e) => setAdminPassword(e.target.value)} autoFocus />
+                </div>
+                {authError && (
+                  <div className="flex items-center gap-2 text-destructive text-sm"><AlertCircle className="h-4 w-4" />{authError}</div>
+                )}
+                <Button
+                  type="submit"
+                  className="w-full text-white border-0"
+                  style={{ background: "linear-gradient(135deg, #0fd4aa 0%, #0aaa88 100%)" }}
+                >
+                  Login Admin
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }

@@ -220,6 +220,31 @@ export default function AIAdvisor() {
         </CardContent>
       </Card>
 
+      {/* Hint — tampil hanya sebelum ada hasil atau error */}
+      {!result && !isAnalyzing && !error && (
+        <Card className="glass-panel border-border/50 border-dashed">
+          <CardContent className="pt-5 pb-5">
+            <div className="flex flex-col sm:flex-row gap-4 items-start">
+              <div className="rounded-lg bg-primary/10 p-3 shrink-0">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
+              <div className="space-y-2 text-sm">
+                <p className="font-semibold text-foreground">Apa yang dilakukan AI Advisor?</p>
+                <ul className="space-y-1 text-muted-foreground list-none">
+                  <li className="flex items-start gap-2"><ChevronRight className="w-4 h-4 shrink-0 mt-0.5 text-primary" /> Menganalisis orderbook & kondisi harga pasar secara real-time</li>
+                  <li className="flex items-start gap-2"><ChevronRight className="w-4 h-4 shrink-0 mt-0.5 text-primary" /> Menentukan kondisi pasar: Bullish, Bearish, Sideways, atau Volatile</li>
+                  <li className="flex items-start gap-2"><ChevronRight className="w-4 h-4 shrink-0 mt-0.5 text-primary" /> Memberikan parameter strategi Grid atau DCA yang optimal beserta alasannya</li>
+                  <li className="flex items-start gap-2"><ChevronRight className="w-4 h-4 shrink-0 mt-0.5 text-primary" /> Rekomendasi dapat langsung dijadikan dasar membuat strategi baru</li>
+                </ul>
+                <p className="text-xs text-muted-foreground/70 pt-1">
+                  ⚡ Pilih market dan tipe strategi di atas, lalu klik <span className="font-semibold text-foreground">Analisis Sekarang</span>
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Error */}
       {error && (
         <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 flex items-start gap-3 text-sm text-destructive">

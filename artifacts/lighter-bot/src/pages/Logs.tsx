@@ -1,8 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { useGetBotLogs, getGetBotLogsQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Terminal, Copy, Check } from "lucide-react";
 import { formatWIBDateTime } from "@/lib/utils";
+
+type LogLevel = "all" | "error" | "warn" | "info";
+
+const LEVEL_FILTERS: { value: LogLevel; label: string }[] = [
+  { value: "all", label: "Semua" },
+  { value: "error", label: "ERROR" },
+  { value: "warn", label: "WARN" },
+  { value: "info", label: "INFO" },
+];
 
 export default function Logs() {
   const { data, isLoading } = useGetBotLogs(
@@ -13,6 +23,7 @@ export default function Logs() {
   const userScrolledUp = useRef(false);
   const [copied, setCopied] = useState(false);
   const [copiedRowId, setCopiedRowId] = useState<number | null>(null);
+  const [levelFilter, setLevelFilter] = useState<LogLevel>("all");
 
   const handleCopyAll = () => {
     if (!logs.length) return;
@@ -48,7 +59,10 @@ export default function Logs() {
     userScrolledUp.current = !isAtBottom;
   };
 
-  const logs = data?.logs ? [...data.logs].reverse() : [];
+  const allLogs = data?.logs ? [...data.logs].reverse() : [];
+  const logs = levelFilter === "all"
+    ? allLogs
+    : allLogs.filter((l) => l.level === levelFilter);
 
   useEffect(() => {
     if (userScrolledUp.current) return;
@@ -71,14 +85,33 @@ export default function Logs() {
 
       <Card className="glass-panel flex-1 overflow-hidden flex flex-col border-border/50">
         {/* Terminal header bar */}
-        <div className="bg-muted px-3 py-2 border-b border-border/50 flex justify-between items-center shrink-0 gap-2">
+        <div className="bg-muted px-3 py-2 border-b border-border/50 flex flex-wrap justify-between items-center shrink-0 gap-2">
           <div className="flex items-center gap-1.5 shrink-0">
             <div className="w-2.5 h-2.5 rounded-full bg-destructive" />
             <div className="w-2.5 h-2.5 rounded-full bg-warning" />
             <div className="w-2.5 h-2.5 rounded-full bg-success" />
           </div>
-          <div className="text-[10px] sm:text-xs font-mono text-muted-foreground truncate text-center min-w-0">
-            lighter-bot.log
+          {/* Level filter buttons */}
+          <div className="flex items-center gap-1">
+            {LEVEL_FILTERS.map((f) => (
+              <Button
+                key={f.value}
+                variant="ghost"
+                size="sm"
+                className={`h-6 px-2 text-[10px] font-mono ${
+                  levelFilter === f.value
+                    ? "bg-white/15 text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                } ${
+                  f.value === "error" && levelFilter === f.value ? "text-destructive" :
+                  f.value === "warn" && levelFilter === f.value ? "text-warning" :
+                  f.value === "info" && levelFilter === f.value ? "text-blue-400" : ""
+                }`}
+                onClick={() => setLevelFilter(f.value)}
+              >
+                {f.label}
+              </Button>
+            ))}
           </div>
           <button
             onClick={handleCopyAll}

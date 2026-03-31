@@ -77,7 +77,12 @@ export default function Login() {
                 </div>
               )}
 
-              <Button type="submit" className="w-full" disabled={loading || !password.trim()}>
+              <Button
+                type="submit"
+                className="w-full text-white border-0"
+                style={{ background: "linear-gradient(135deg, #0fd4aa 0%, #0aaa88 100%)" }}
+                disabled={loading || !password.trim()}
+              >
                 {loading ? "Memverifikasi..." : "Masuk"}
               </Button>
             </form>
