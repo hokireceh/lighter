@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Settings as SettingsIcon, Save, KeyRound, ShieldAlert, Search, CheckCircle2, Bell, Bot, Send, Loader2 } from "lucide-react";
+import { Settings as SettingsIcon, Save, KeyRound, ShieldAlert, Search, CheckCircle2, Bell, Bot, Send, Loader2, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const configSchema = z.object({
@@ -35,6 +35,7 @@ export default function Settings() {
   const [isLookingUp, setIsLookingUp] = useState(false);
   const [detectedBalance, setDetectedBalance] = useState<string | null>(null);
   const [isTesting, setIsTesting] = useState(false);
+  const [showPrivateKey, setShowPrivateKey] = useState(false);
 
   const updateMutation = useUpdateBotConfig({
     mutation: {
@@ -246,12 +247,22 @@ export default function Settings() {
 
                 <div className="space-y-2 md:col-span-2">
                   <Label>Private Key</Label>
-                  <Input 
-                    type="password" 
-                    {...form.register("privateKey")} 
-                    placeholder={config?.hasPrivateKey ? "••••••••••••••••••••••••••••••••" : "Masukkan private key..."} 
-                    className="bg-background font-mono" 
-                  />
+                  <div className="relative">
+                    <Input 
+                      type={showPrivateKey ? "text" : "password"}
+                      {...form.register("privateKey")} 
+                      placeholder={config?.hasPrivateKey ? "••••••••••••••••••••••••••••••••" : "Masukkan private key..."} 
+                      className="bg-background font-mono pr-10" 
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPrivateKey(v => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPrivateKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                   <p className="text-xs text-muted-foreground">Jaga kerahasiaannya. Diperlukan untuk menandatangani order di Lighter.</p>
                 </div>
               </div>
@@ -343,10 +354,11 @@ export default function Settings() {
             <Button 
               type="submit" 
               size="lg" 
-              className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_20px_rgba(var(--primary),0.3)]"
+              className="text-white shadow-lg gap-2"
+              style={{ background: "linear-gradient(135deg, #0fd4aa 0%, #0aaa88 100%)" }}
               disabled={updateMutation.isPending}
             >
-              <Save className="w-5 h-5 mr-2" />
+              {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               {updateMutation.isPending ? "Menyimpan..." : "Simpan Konfigurasi"}
             </Button>
           </div>

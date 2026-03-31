@@ -3,7 +3,7 @@ import { useGetTradeHistory, getGetTradeHistoryQueryKey } from "@workspace/api-c
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { History, ExternalLink } from "lucide-react";
+import { History, ExternalLink, ReceiptText } from "lucide-react";
 import { formatWIBDateTime } from "@/lib/utils";
 
 function SideBadge({ side }: { side: string }) {
@@ -73,8 +73,10 @@ export default function Trades() {
           ))
         ) : !data?.trades.length ? (
           <Card className="glass-panel">
-            <CardContent className="p-6 text-center text-muted-foreground text-sm">
-              Belum ada trade.
+            <CardContent className="py-12 flex flex-col items-center text-center gap-3">
+              <ReceiptText className="w-12 h-12 text-muted-foreground opacity-20" />
+              <p className="text-muted-foreground text-sm font-medium">Belum ada riwayat trade</p>
+              <p className="text-xs text-muted-foreground/60">Trade akan muncul di sini setelah bot pertama kamu berjalan</p>
             </CardContent>
           </Card>
         ) : (
@@ -160,8 +162,12 @@ export default function Trades() {
                   ))
                 ) : !data?.trades.length ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
-                      Belum ada trade.
+                    <TableCell colSpan={7} className="h-48 text-center">
+                      <div className="flex flex-col items-center gap-3">
+                        <ReceiptText className="w-10 h-10 text-muted-foreground opacity-20" />
+                        <p className="text-muted-foreground text-sm font-medium">Belum ada riwayat trade</p>
+                        <p className="text-xs text-muted-foreground/60">Trade akan muncul di sini setelah bot pertama kamu berjalan</p>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : (

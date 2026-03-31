@@ -587,8 +587,8 @@ export function CreateStrategyModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_20px_rgba(var(--primary),0.3)]">
-          <Plus className="w-4 h-4 mr-2" />
+        <Button className="text-white shadow-lg gap-2" style={{ background: "linear-gradient(135deg, #0fd4aa 0%, #0aaa88 100%)" }}>
+          <Plus className="w-4 h-4" />
           Strategi Baru
         </Button>
       </DialogTrigger>

@@ -145,10 +145,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-success/5 rounded-full blur-[100px] pointer-events-none" />
 
         {!isConfigured && location !== "/settings" && (
-          <div className="bg-warning/10 border-b border-warning/20 px-6 py-3 flex items-center justify-center gap-2 backdrop-blur-md z-20">
-            <span className="text-warning text-sm font-medium">API Key belum dikonfigurasi. Mode paper trading atau fitur terbatas.</span>
-            <Link href="/settings" className="text-xs bg-warning/20 hover:bg-warning/30 text-warning px-2 py-1 rounded transition-colors">
-              Buka Pengaturan
+          <div className="border-b border-border/50 px-4 py-1.5 flex items-center justify-center gap-2 z-20">
+            <span className="text-muted-foreground text-xs">API Key belum dikonfigurasi.</span>
+            <Link href="/settings" className="text-xs text-emerald-400 hover:text-emerald-300 underline underline-offset-2 transition-colors">
+              Buka Pengaturan →
             </Link>
           </div>
         )}
