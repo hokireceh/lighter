@@ -261,11 +261,11 @@ export default function Admin() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-4 gap-4">
-          <Card><CardContent className="pt-4 text-center"><p className="text-3xl font-bold">{users.length}</p><p className="text-sm text-muted-foreground">Total User</p></CardContent></Card>
-          <Card><CardContent className="pt-4 text-center"><p className="text-3xl font-bold text-green-600">{activeUsers}</p><p className="text-sm text-muted-foreground">Aktif</p></CardContent></Card>
-          <Card><CardContent className="pt-4 text-center"><p className="text-3xl font-bold text-red-500">{expiredUsers}</p><p className="text-sm text-muted-foreground">Expired</p></CardContent></Card>
-          <Card><CardContent className="pt-4 text-center"><p className="text-3xl font-bold text-blue-500">{runningBots}</p><p className="text-sm text-muted-foreground">Bot Running</p></CardContent></Card>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <Card><CardContent className="pt-4 text-center"><p className="text-2xl sm:text-3xl font-bold">{users.length}</p><p className="text-xs sm:text-sm text-muted-foreground">Total User</p></CardContent></Card>
+          <Card><CardContent className="pt-4 text-center"><p className="text-2xl sm:text-3xl font-bold text-green-600">{activeUsers}</p><p className="text-xs sm:text-sm text-muted-foreground">Aktif</p></CardContent></Card>
+          <Card><CardContent className="pt-4 text-center"><p className="text-2xl sm:text-3xl font-bold text-red-500">{expiredUsers}</p><p className="text-xs sm:text-sm text-muted-foreground">Expired</p></CardContent></Card>
+          <Card><CardContent className="pt-4 text-center"><p className="text-2xl sm:text-3xl font-bold text-blue-500">{runningBots}</p><p className="text-xs sm:text-sm text-muted-foreground">Bot Running</p></CardContent></Card>
         </div>
 
         {error && (
@@ -277,10 +277,22 @@ export default function Admin() {
 
         <Tabs defaultValue="users">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="users" className="flex items-center gap-1"><Users className="h-3.5 w-3.5" /> Users</TabsTrigger>
-            <TabsTrigger value="monitor" className="flex items-center gap-1"><Monitor className="h-3.5 w-3.5" /> Monitor Bot</TabsTrigger>
-            <TabsTrigger value="payments" className="flex items-center gap-1"><CreditCard className="h-3.5 w-3.5" /> Payments</TabsTrigger>
-            <TabsTrigger value="broadcast" className="flex items-center gap-1"><Megaphone className="h-3.5 w-3.5" /> Broadcast</TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center gap-1">
+              <Users className="h-3.5 w-3.5 shrink-0" />
+              <span className="hidden sm:inline">Users</span>
+            </TabsTrigger>
+            <TabsTrigger value="monitor" className="flex items-center gap-1">
+              <Monitor className="h-3.5 w-3.5 shrink-0" />
+              <span className="hidden sm:inline">Monitor</span>
+            </TabsTrigger>
+            <TabsTrigger value="payments" className="flex items-center gap-1">
+              <CreditCard className="h-3.5 w-3.5 shrink-0" />
+              <span className="hidden sm:inline">Payments</span>
+            </TabsTrigger>
+            <TabsTrigger value="broadcast" className="flex items-center gap-1">
+              <Megaphone className="h-3.5 w-3.5 shrink-0" />
+              <span className="hidden sm:inline">Broadcast</span>
+            </TabsTrigger>
           </TabsList>
 
           {/* ===== USERS TAB ===== */}
