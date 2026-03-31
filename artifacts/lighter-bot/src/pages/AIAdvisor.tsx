@@ -144,10 +144,6 @@ export default function AIAdvisor() {
   const cond = result ? conditionConfig[result.marketCondition] : null;
   const risk = result ? riskConfig[result.riskLevel] : null;
 
-  const strategyQuery = result
-    ? `?type=${result.strategy}&market=${selectedMarketIndex}`
-    : "";
-
   return (
     <div className="space-y-6 max-w-4xl animate-in fade-in duration-500">
       <header>
