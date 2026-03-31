@@ -552,7 +552,16 @@ export async function getTx(
       network
     );
   } catch (err) {
-    logger.error({ err, by, value }, "Failed to fetch transaction");
+    // code 21500 = "transaction not found" — Lighter hasn't indexed the tx yet.
+    // This is a normal transient condition during order confirmation polling;
+    // the bot will retry on the next poll cycle. Use warn, not error.
+    const msg = err instanceof Error ? err.message : String(err);
+    const isNotFound = msg.includes("21500") || msg.includes("transaction not found");
+    if (isNotFound) {
+      logger.warn({ by, value, network }, "Tx not yet indexed by Lighter (code 21500) — will retry");
+    } else {
+      logger.error({ err, by, value }, "Failed to fetch transaction");
+    }
     return null;
   }
 }

@@ -15,7 +15,15 @@ import { useToast } from "@/hooks/use-toast";
 const configSchema = z.object({
   network: z.enum(["mainnet", "testnet"]),
   accountIndex: z.coerce.number().nullable().optional(),
-  apiKeyIndex: z.coerce.number().nullable().optional(),
+  apiKeyIndex: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined) ? null : Number(val),
+    z.number()
+      .int("Harus bilangan bulat")
+      .min(3, "Index minimal 3 (indeks 0–2 dicadangkan Lighter)")
+      .max(254, "Index maksimal 254")
+      .nullable()
+      .optional()
+  ),
   privateKey: z.string().optional(),
   l1Address: z.string().optional(),
   notifyBotToken: z.string().optional(),
@@ -242,7 +250,11 @@ export default function Settings() {
 
                 <div className="space-y-2">
                   <Label>API Key Index</Label>
-                  <Input type="number" {...form.register("apiKeyIndex")} placeholder="mis. 7" className="bg-background font-mono" />
+                  <Input type="number" {...form.register("apiKeyIndex")} placeholder="mis. 7" className="bg-background font-mono" min={3} max={254} />
+                  <p className="text-xs text-muted-foreground">Rentang valid: 3–254 (indeks 0–2 dicadangkan Lighter)</p>
+                  {form.formState.errors.apiKeyIndex && (
+                    <p className="text-xs text-destructive">{form.formState.errors.apiKeyIndex.message as string}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
