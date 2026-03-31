@@ -236,12 +236,20 @@ export interface LighterOrderBookResponse {
   asks: LighterOrderBookEntry[];
 }
 
-// Raw response from /api/v1/orderBookOrders — nested under order_book
+// Raw response from /api/v1/orderBookOrders — verified 2026-03-31 against live API.
+// bids/asks are at ROOT level (not nested under order_book).
+// Each entry uses remaining_base_amount (not size) as the quantity field.
+interface LighterSimpleOrder {
+  price: string;
+  remaining_base_amount: string;
+}
+
 interface LighterOrderBookOrdersRaw {
-  order_book?: {
-    bids?: LighterOrderBookEntry[];
-    asks?: LighterOrderBookEntry[];
-  };
+  code?: number;
+  total_bids?: number;
+  total_asks?: number;
+  bids?: LighterSimpleOrder[];
+  asks?: LighterSimpleOrder[];
 }
 
 export async function getOrderBookDepth(marketId: number, network: Network = "mainnet"): Promise<LighterOrderBookResponse> {
@@ -251,8 +259,8 @@ export async function getOrderBookDepth(marketId: number, network: Network = "ma
       network
     );
     return {
-      bids: raw.order_book?.bids ?? [],
-      asks: raw.order_book?.asks ?? [],
+      bids: (raw.bids ?? []).map((e) => ({ price: e.price, size: e.remaining_base_amount })),
+      asks: (raw.asks ?? []).map((e) => ({ price: e.price, size: e.remaining_base_amount })),
     };
   } catch (err) {
     logger.error({ err, marketId }, "Failed to fetch order book depth");

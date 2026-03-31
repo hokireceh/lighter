@@ -149,7 +149,7 @@ Available scripts:
 
 ### Bug fixes history
 - `getCandles`: parameter diganti dari `from`/`to` (detik) → `start_timestamp`/`end_timestamp` (milidetik), resolution dari angka (`"60"`) → enum string (`"1h"`), ditambah `count_back` yang sebelumnya hilang
-- `getOrderBookDepth`: endpoint dari `/api/v1/orderBook` (tidak ada) → `/api/v1/orderBookOrders`, param `depth` → `limit`, response parsing dari root level → nested `order_book.bids`/`order_book.asks`
+- `getOrderBookDepth`: endpoint dari `/api/v1/orderBook` (tidak ada) → `/api/v1/orderBookOrders`, param `depth` → `limit`. **FIXED 2026-03-31 (live-verified via curl)**: response `bids`/`asks` ada di ROOT level (bukan nested `order_book`), field ukuran adalah `remaining_base_amount` (bukan `size`). Mapping `remaining_base_amount` → `size` dilakukan di `getOrderBookDepth`. Sebelumnya order book display selalu kosong.
 
 ### Candles resolution enum
 `1m` | `5m` | `15m` | `30m` | `1h` | `4h` | `12h` | `1d` | `1w`

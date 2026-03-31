@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Star, Search, TrendingUp, TrendingDown, BarChart2, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface MarketRow {
