@@ -78,9 +78,9 @@ Every package extends `tsconfig.base.json` which sets `composite: true`. The roo
 
 ## Replit Environment Setup
 
-- **Frontend workflow**: `Start application` — runs `cd artifacts/lighter-bot && PORT=5000 pnpm run dev` on port 5000 (webview)
-- **Backend workflow**: `Start Backend` — runs `cd artifacts/api-server && PORT=8000 pnpm run dev` on port 8000 (console)
-- **Vite proxy**: Frontend proxies `/api` → `http://localhost:8000`
+- **Frontend workflow**: `Start application` — runs `PORT=5000 pnpm --filter @workspace/lighter-bot run dev` on port 5000 (webview)
+- **Backend workflow**: `Backend API` — runs `cd artifacts/api-server && PORT=8080 pnpm run dev` on port 8080 (console)
+- **Vite proxy**: Frontend proxies `/api` → `http://localhost:8080`
 - **Database**: Replit PostgreSQL provisioned, schema pushed via `pnpm --filter @workspace/db run push`
 - **Deployment target**: `vm` (always-on, needed for Telegram bot + trading engine)
 
