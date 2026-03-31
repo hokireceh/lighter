@@ -129,7 +129,11 @@ export function connect(network?: "mainnet" | "testnet"): void {
 
   ws.addEventListener("error", () => {
     logger.error("[WS] WebSocket error");
-    ws?.close();
+    // Do NOT call ws.close() here — the WebSocket spec guarantees that an error
+    // event is always followed by a close event. Calling close() here causes
+    // infinite recursion in Node.js undici: failWebsocketConnection() fires
+    // another error event → handler calls close() again → stack overflow.
+    // Reconnect is already handled by the close event handler above.
   });
 }
 
