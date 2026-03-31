@@ -126,7 +126,12 @@ export default function Strategies() {
       onSuccess: () => {
         toast({ title: "Bot Dihentikan", description: "Strategi telah dijeda." });
         queryClient.invalidateQueries({ queryKey: getGetStrategiesQueryKey() });
-      }
+      },
+      onError: (err: any) => {
+        const msg = err?.response?.data?.error ?? err?.message ?? "Gagal menghentikan bot.";
+        toast({ title: "Tidak Dapat Menghentikan Bot", description: msg, variant: "destructive" });
+        queryClient.invalidateQueries({ queryKey: getGetStrategiesQueryKey() });
+      },
     }
   });
 

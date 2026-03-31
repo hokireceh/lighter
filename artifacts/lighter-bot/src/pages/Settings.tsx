@@ -2,14 +2,15 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useGetBotConfig, useUpdateBotConfig } from "@workspace/api-client-react";
+import { useGetBotConfig, useUpdateBotConfig, useGetStrategies } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Settings as SettingsIcon, Save, KeyRound, ShieldAlert, Search, CheckCircle2, Bell, Bot, Send, Loader2, Eye, EyeOff } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Settings as SettingsIcon, Save, KeyRound, ShieldAlert, Search, CheckCircle2, Bell, Bot, Send, Loader2, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const configSchema = z.object({
@@ -40,10 +41,37 @@ type FormData = z.infer<typeof configSchema>;
 export default function Settings() {
   const { toast } = useToast();
   const { data: config, isLoading } = useGetBotConfig();
+  const { data: strategiesData } = useGetStrategies();
   const [isLookingUp, setIsLookingUp] = useState(false);
   const [detectedBalance, setDetectedBalance] = useState<string | null>(null);
   const [isTesting, setIsTesting] = useState(false);
   const [showPrivateKey, setShowPrivateKey] = useState(false);
+  const [pendingNetwork, setPendingNetwork] = useState<"mainnet" | "testnet" | null>(null);
+  const [showNetworkWarning, setShowNetworkWarning] = useState(false);
+
+  const runningBots = (strategiesData?.strategies ?? []).filter((s) => s.isRunning);
+
+  const handleNetworkChange = (value: "mainnet" | "testnet") => {
+    if (runningBots.length > 0) {
+      setPendingNetwork(value);
+      setShowNetworkWarning(true);
+    } else {
+      form.setValue("network", value);
+    }
+  };
+
+  const confirmNetworkChange = () => {
+    if (pendingNetwork) {
+      form.setValue("network", pendingNetwork);
+    }
+    setPendingNetwork(null);
+    setShowNetworkWarning(false);
+  };
+
+  const cancelNetworkChange = () => {
+    setPendingNetwork(null);
+    setShowNetworkWarning(false);
+  };
 
   const updateMutation = useUpdateBotConfig({
     mutation: {
@@ -205,7 +233,7 @@ export default function Settings() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label>Jaringan</Label>
-                  <Select value={form.watch("network")} onValueChange={(v: any) => form.setValue("network", v)}>
+                  <Select value={form.watch("network")} onValueChange={(v: any) => handleNetworkChange(v)}>
                     <SelectTrigger className="bg-background">
                       <SelectValue />
                     </SelectTrigger>
@@ -376,6 +404,42 @@ export default function Settings() {
           </div>
         </form>
       )}
+
+      <AlertDialog open={showNetworkWarning} onOpenChange={(open) => !open && cancelNetworkChange()}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-warning">
+              <AlertTriangle className="w-5 h-5" />
+              Ganti Jaringan — Bot Sedang Aktif
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2 text-left">
+              <span className="block">
+                Ada <strong>{runningBots.length} bot</strong> yang sedang berjalan:
+              </span>
+              <ul className="list-disc list-inside text-sm space-y-0.5 text-muted-foreground">
+                {runningBots.map((b) => (
+                  <li key={b.id}>{b.name} — {b.marketSymbol}</li>
+                ))}
+              </ul>
+              <span className="block pt-1">
+                Mengganti jaringan ke <strong>{pendingNetwork}</strong> tidak akan otomatis menghentikan bot. Bot yang berjalan akan tetap menggunakan jaringan lama sampai dihentikan dan diulang. Pastikan kamu menghentikan semua bot sebelum mengganti jaringan.
+              </span>
+              <span className="block text-warning font-medium pt-1">
+                Lanjutkan mengganti jaringan?
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelNetworkChange}>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmNetworkChange}
+              className="bg-warning text-warning-foreground hover:bg-warning/90"
+            >
+              Tetap Ganti Jaringan
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

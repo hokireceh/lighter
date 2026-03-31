@@ -17,7 +17,7 @@ const LEVEL_FILTERS: { value: LogLevel; label: string }[] = [
 export default function Logs() {
   const { data, isLoading } = useGetBotLogs(
     { limit: 200 },
-    { query: { queryKey: getGetBotLogsQueryKey({ limit: 200 }), refetchInterval: 3000 } }
+    { query: { queryKey: getGetBotLogsQueryKey({ limit: 200 }), refetchInterval: 5000 } }
   );
   const scrollRef = useRef<HTMLDivElement>(null);
   const userScrolledUp = useRef(false);
