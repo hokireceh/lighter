@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, Bot, Lock } from "lucide-react";
+import { AlertCircle, TrendingUp, Lock } from "lucide-react";
 
 export default function Login() {
   const { login } = useAuth();
@@ -28,17 +28,18 @@ export default function Login() {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-3">
           <div className="flex justify-center">
-            <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
-              <Bot className="h-9 w-9 text-primary" />
+            <div className="h-16 w-16 rounded-2xl flex items-center justify-center"
+              style={{ background: "linear-gradient(135deg, #0fd4aa 0%, #0aaa88 100%)" }}>
+              <TrendingUp className="h-9 w-9 text-white" strokeWidth={2.5} />
             </div>
           </div>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Hokireceh</h1>
-            <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase mt-0.5">Projects</p>
+            <p className="text-[10px] font-semibold text-muted-foreground tracking-[0.2em] uppercase mt-1">Projects</p>
           </div>
-          <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 w-fit mx-auto">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-            <span className="text-[11px] font-semibold text-emerald-500">Lighter DEX</span>
+          <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-500/10 border border-emerald-500/25 w-fit mx-auto">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            <span className="text-[11px] font-semibold text-emerald-400">Lighter DEX</span>
           </div>
         </div>
 

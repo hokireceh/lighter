@@ -7,7 +7,7 @@ import {
   History, 
   Settings, 
   Terminal,
-  Activity,
+  TrendingUp,
   LogOut,
   User,
   Sparkles
@@ -36,30 +36,39 @@ export function AppLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background flex flex-col md:flex-row font-sans">
       {/* Sidebar */}
-      <aside className="w-full md:w-64 border-b md:border-r border-border bg-card/50 flex flex-col z-10 shrink-0">
-        {/* Brand */}
-        <div className="px-4 py-3 md:px-5 md:py-4 md:border-b md:border-border/50">
+      <aside className="w-full md:w-60 border-b md:border-r border-border bg-card/50 flex flex-col z-10 shrink-0">
+
+        {/* ── Brand ────────────────────────────────────── */}
+        <div className="px-4 py-3 md:px-5 md:pt-5 md:pb-4 md:border-b md:border-border/40">
+          {/* Logo row */}
           <div className="flex items-center gap-3">
-            <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30 text-primary shrink-0">
-              <Activity className="w-4 h-4 md:w-[18px] md:h-[18px]" />
+            {/* Icon — teal solid, distinctive */}
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: "linear-gradient(135deg, #0fd4aa 0%, #0aaa88 100%)" }}>
+              <TrendingUp className="w-4 h-4 text-white" strokeWidth={2.5} />
             </div>
-            <div className="min-w-0">
-              <div className="font-bold text-base md:text-[15px] leading-tight tracking-tight text-foreground">
+
+            {/* Brand text */}
+            <div className="leading-none min-w-0">
+              <div className="font-bold text-[15px] tracking-tight text-foreground">
                 Hokireceh
               </div>
-              <div className="hidden md:block text-[10px] text-muted-foreground font-medium tracking-widest uppercase leading-tight mt-0.5">
+              <div className="hidden md:block text-[9px] font-semibold tracking-[0.2em] uppercase text-muted-foreground mt-[3px]">
                 Projects
               </div>
             </div>
           </div>
-          {/* DEX Active Badge — desktop only */}
-          <div className="hidden md:flex items-center gap-1.5 mt-3 px-2.5 py-1.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 w-fit">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-            <span className="text-[11px] font-semibold text-emerald-500 leading-none">Lighter DEX</span>
+
+          {/* Active DEX badge — desktop only */}
+          <div className="hidden md:inline-flex items-center gap-1.5 mt-3 px-2.5 py-1 rounded-md
+            bg-emerald-500/10 border border-emerald-500/25">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            <span className="text-[11px] font-semibold text-emerald-400 leading-none">Lighter DEX</span>
           </div>
         </div>
 
-        <nav className="flex-1 px-2 md:px-4 py-1 md:py-2 overflow-x-auto md:overflow-visible flex md:flex-col md:space-y-1">
+        {/* ── Nav ──────────────────────────────────────── */}
+        <nav className="flex-1 px-2 md:px-3 py-1 md:py-3 overflow-x-auto md:overflow-visible flex md:flex-col md:space-y-0.5">
           {navItems.map((item) => {
             const isActive = location === item.href;
             return (
@@ -67,23 +76,23 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 key={item.href}
                 href={item.href}
                 className={`
-                  flex flex-col md:flex-row items-center md:items-center gap-0.5 md:gap-3
-                  px-2.5 md:px-3 py-2 md:py-2.5 rounded-lg text-xs md:text-sm font-medium transition-all duration-200
-                  min-w-[56px] md:min-w-0 shrink-0
-                  ${isActive 
-                    ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(var(--primary),0.1)]" 
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground border border-transparent"}
+                  flex flex-col md:flex-row items-center md:items-center gap-0.5 md:gap-2.5
+                  px-2.5 md:px-3 py-2 md:py-2 rounded-lg text-xs md:text-[13px] font-medium transition-all duration-150
+                  min-w-[52px] md:min-w-0 shrink-0
+                  ${isActive
+                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground border border-transparent"}
                 `}
               >
-                <item.icon className={`w-4 h-4 ${isActive ? "text-primary" : ""}`} />
+                <item.icon className={`w-4 h-4 shrink-0 ${isActive ? "text-emerald-400" : ""}`} />
                 <span className="leading-tight text-center md:text-left">{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Status Indicator */}
-        <div className="p-4 mt-auto hidden md:block space-y-3">
+        {/* ── Status / User — desktop only ─────────────── */}
+        <div className="p-3 md:p-4 mt-auto hidden md:block space-y-2.5">
           {user && (
             <div className="bg-background rounded-xl p-3 border border-border">
               <div className="flex items-center gap-2 mb-2">
@@ -111,24 +120,20 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </Button>
             </div>
           )}
-          <div className="bg-background rounded-xl p-4 border border-border shadow-inner">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</span>
-              <div className="flex items-center gap-1.5">
-                <span className="relative flex h-2 w-2">
-                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isConfigured ? 'bg-success' : 'bg-warning'}`}></span>
-                  <span className={`relative inline-flex rounded-full h-2 w-2 ${isConfigured ? 'bg-success' : 'bg-warning'}`}></span>
-                </span>
-                <span className={`text-xs font-medium ${isConfigured ? 'text-success' : 'text-warning'}`}>
-                  {isConfigured ? "Siap" : "Perlu Konfigurasi"}
-                </span>
-              </div>
+
+          <div className="bg-background rounded-xl p-3 border border-border">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[11px] text-muted-foreground">Jaringan</span>
+              <span className="text-[11px] font-mono text-foreground">{config?.network || '—'}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Jaringan</span>
-              <span className="text-xs font-mono text-foreground bg-muted px-1.5 py-0.5 rounded">
-                {config?.network || 'Unknown'}
-              </span>
+              <span className="text-[11px] text-muted-foreground">Status</span>
+              <div className="flex items-center gap-1.5">
+                <span className={`w-1.5 h-1.5 rounded-full ${isConfigured ? 'bg-emerald-400' : 'bg-yellow-400'}`} />
+                <span className={`text-[11px] font-medium ${isConfigured ? 'text-emerald-400' : 'text-yellow-400'}`}>
+                  {isConfigured ? "Ready" : "Setup"}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -136,10 +141,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
       {/* Main Content */}
       <main className="flex-1 relative overflow-hidden flex flex-col">
-        {/* Decorative background effects */}
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-success/5 rounded-full blur-[100px] pointer-events-none" />
-        
+
         {!isConfigured && location !== "/settings" && (
           <div className="bg-warning/10 border-b border-warning/20 px-6 py-3 flex items-center justify-center gap-2 backdrop-blur-md z-20">
             <span className="text-warning text-sm font-medium">API Key belum dikonfigurasi. Mode paper trading atau fitur terbatas.</span>
