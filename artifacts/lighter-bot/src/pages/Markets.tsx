@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Star, Search, TrendingUp, TrendingDown, BarChart2, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -172,19 +172,19 @@ function RecentlyListedPanel({ items }: { items: MarketRow[] }) {
         <span style={{ color: "#64748b", fontWeight: 600, textAlign: "right", paddingBottom: 4, borderBottom: "1px solid #1e1e2e" }}>Harga</span>
         <span style={{ color: "#64748b", fontWeight: 600, textAlign: "right", paddingBottom: 4, borderBottom: "1px solid #1e1e2e" }}>Umur</span>
         {items.map((m) => (
-          <>
-            <span key={`n-${m.index}`} style={{ display: "flex", alignItems: "center", gap: 6, paddingTop: 5 }}>
+          <React.Fragment key={m.index}>
+            <span style={{ display: "flex", alignItems: "center", gap: 6, paddingTop: 5 }}>
               <CoinIcon symbol={m.baseAsset} size={18} />
               <span style={{ color: "#e2e8f0", fontWeight: 600 }}>{m.baseAsset}</span>
               {m.type === "perp" && m.maxLeverage && (
                 <span style={{ fontSize: 9, background: "#2d1515", color: "#ff6b6b", border: "1px solid #5c2020", borderRadius: 3, padding: "1px 4px", fontWeight: 700 }}>{m.maxLeverage}X</span>
               )}
             </span>
-            <span key={`p-${m.index}`} style={{ fontFamily: "monospace", color: "#e2e8f0", textAlign: "right", paddingTop: 5 }}>
+            <span style={{ fontFamily: "monospace", color: "#e2e8f0", textAlign: "right", paddingTop: 5 }}>
               ${formatPrice(m.lastPrice, m.priceDecimals)}
             </span>
-            <span key={`a-${m.index}`} style={{ color: "#64748b", textAlign: "right", paddingTop: 5 }}>{age(m.listedAt)}</span>
-          </>
+            <span style={{ color: "#64748b", textAlign: "right", paddingTop: 5 }}>{age(m.listedAt)}</span>
+          </React.Fragment>
         ))}
       </div>
     </div>
