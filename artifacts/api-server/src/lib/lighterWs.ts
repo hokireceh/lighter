@@ -1,5 +1,6 @@
 import Decimal from "decimal.js";
 import { logger } from "./logger";
+import { WebSocket } from "undici";
 
 const WS_URLS: Record<string, string> = {
   mainnet: "wss://mainnet.zklighter.elliot.ai/stream",
