@@ -51,38 +51,43 @@ IMPORTANT: The "reasoning" field in your JSON response MUST be written in Bahasa
 
 ### DCA (Dollar Cost Averaging)
 - Best for: trending markets (up for buy, down for sell), long-term accumulation
-- Amount per order: based on available capital and risk tolerance (typically 1-5% of portfolio per order)
-- Interval: shorter intervals (30-60 min) in high volatility, longer (2h-6h) for stable trends
-  - Adjust +1 interval tier if volume < $2B (wider spreads/volatility)
-  - Adjust -1 tier if volume > $10B (tighter execution)
-- Order type recommendation: POST-ONLY or LIMIT (both maker, zero fees on Standard Account)
-  - POST-ONLY: guaranteed maker, no taker fallback (use when confident in price level)
-  - LIMIT: traditional execution, use offset to balance speed vs. fill rate
-- Limit price offset: buy slightly below market (0.1-0.5% offset), sell slightly above
-  - Increase offset by +0.2% during high volatility (>20% 24h range) to improve fill rate
-  - Consider latency (200-300ms): offset mitigates slippage from order confirmation delay
+- Amount per order: 2-4% of portfolio per order (conservative range for risk-aware accumulation)
+- Interval base rules by volume:
+  - Low (<$2B): +1 interval tier (wider spreads → slower execution)
+  - Normal-high ($2-10B, Lighter sweet spot Mar 2026): 45 min base interval
+  - High (>$10B): -1 interval tier (tighter spreads → faster fill)
+- Order type recommendation: POST-ONLY 90% of the time (guaranteed maker, zero fees on Standard Account)
+  - Fallback to LIMIT only when volume < $3B (lower fill rate for post-only in thin markets)
+  - POST-ONLY: no taker fallback — use when confident in price level
+  - LIMIT: use offset to balance speed vs. fill rate when volume is thin
+- Limit price offset by volume:
+  - Normal-high ($2-10B): use +0.3% offset (accounts for 200-300ms latency + spread)
+  - High (>$10B): +0.1-0.2% offset (tighter spreads, faster fills)
+  - Low (<$2B): +0.4-0.5% offset (wider spreads, slippage risk higher)
+  - Increase offset by +0.2% during high volatility (>20% 24h range)
 - Cancel stale orders after 2x interval to refresh prices in volatile markets
 
 ### Grid Trading
 - Best for: sideways/ranging markets with clear boundaries
 - Lower/Upper price: typically set at key support/resistance levels
   - Conservative: ±5-10% range from current price (tight markets, low volatility)
-  - Moderate: ±10-20% range (normal volatility, mixed sentiment)
+  - Moderate: ±15% range (normal-high volume, mixed sentiment — recommended for $2-10B)
   - Aggressive: ±20-40% range for high-volatility assets (volatility >15% 24h)
-- Grid levels: more levels = smaller profits per trade but higher frequency
+- Grid levels by volume:
   - Tight range (<10%): 5-10 levels
-  - Medium range (10-20%): 10-15 levels
+  - Medium range (10-20%): 12-17 levels for normal-high volume ($2-10B) — +2 vs low-volume baseline
   - Wide range (>20%): 15-20 levels
 - Amount per grid: small enough that all grids can be filled simultaneously
 - Mode:
-  - neutral: trade both directions (best for true ranging markets)
-  - long: only buy on dips (bullish bias, use in uptrends capped by resistance)
+  - neutral: trade both directions (best for true ranging stablecoin pairs)
+  - long: only buy on dips (bullish bias — recommended for ETH/L2 pairs when price is above 200W SMA ~$2.5K support)
   - short: only sell on rallies (bearish bias, use in downtrends capped by support)
-- Stop Loss: set below strong support (outside grid range by 5-10%), required for aggressive grids
+- Stop Loss: MANDATORY if grid range > ±20% — set at -5% below lowerPrice (outside grid range)
+  - For moderate ±15% grids: strongly recommended, set at lower boundary minus 5%
 - Take Profit: set above strong resistance (outside grid range by 5-10%), optional
-- Order type: POST-ONLY strongly preferred (maker-only, zero fees, prevents accidental taker)
-  - Fallback to LIMIT if Post-Only fills are too rare (volume-dependent)
-  - Avoid MARKET orders (taker fees + slippage)
+- Order type: POST-ONLY 90% of the time (maker-only, zero fees, prevents accidental taker)
+  - Fallback to LIMIT if volume < $3B (fill rate too low for post-only)
+  - NEVER use MARKET orders (taker fees + slippage = profit killer on Lighter)
 
 ## Response Format
 Always respond with a valid JSON object only, no markdown, no explanation outside JSON:
@@ -167,9 +172,10 @@ function buildUserPrompt(strategyType: "dca" | "grid", market: MarketContext): s
     ? (((market.high24h - market.low24h) / market.low24h) * 100).toFixed(1)
     : "N/A";
 
-  const volumeContext = market.volume24h > 10e9 ? "high ($10B+)" 
-    : market.volume24h > 2e9 ? "normal ($2-10B)" 
-    : "low (<$2B)";
+  const volumeContext = market.volume24h > 10e9 ? "high ($10B+)"
+    : market.volume24h > 3e9 ? "normal-high ($3-10B) — use post_only, 45min base interval, +0.3% offset, grid +2 levels"
+    : market.volume24h > 2e9 ? "normal ($2-3B) — fallback to limit if post_only fill rate low, +0.3% offset"
+    : "low (<$2B) — use limit orders, +0.5% offset, slower interval";
 
   return `Analyze this Lighter DEX market and recommend optimal ${strategyType.toUpperCase()} strategy parameters.
 IMPORTANT: All numbers in your JSON response MUST use a dot (.) as the decimal separator, never a comma. Example: 64956.4 not 64956,4.
@@ -192,7 +198,7 @@ ${(() => {
     : "$1000 USDC (estimated)";
   return strategyType === "grid"
     ? `Capital Available: ${capital}. Size amountPerGrid so all grid levels can be filled simultaneously, AND above the minimum stated above. Provide appropriate stop-loss.`
-    : `Capital Available: ${capital}. Size amountPerOrder conservatively (1-5% of capital per order), AND above the minimum stated above.`;
+    : `Capital Available: ${capital}. Size amountPerOrder at 2-4% of capital per order (conservative, risk-aware), AND above the minimum stated above.`;
 })()}
 
 Return ONLY valid JSON matching the specification. Ensure strategy and appropriate params are set, others null.`;
