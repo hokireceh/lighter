@@ -10,7 +10,6 @@ import Login from "@/pages/Login";
 // Browser only downloads the chunk for the page the user actually visits
 const Admin = lazy(() => import("@/pages/Admin"));
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
-const Markets = lazy(() => import("@/pages/Markets"));
 const Strategies = lazy(() => import("@/pages/Strategies"));
 const Trades = lazy(() => import("@/pages/Trades"));
 const Logs = lazy(() => import("@/pages/Logs"));
@@ -50,7 +49,6 @@ function AuthenticatedRouter() {
       <AppLayout>
         <Switch>
           <Route path="/" component={Dashboard} />
-          <Route path="/markets" component={Markets} />
           <Route path="/strategies" component={Strategies} />
           <Route path="/trades" component={Trades} />
           <Route path="/logs" component={Logs} />
