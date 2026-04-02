@@ -131,5 +131,3 @@ build = ["bash", "-c", "pnpm run build"]
 [userenv]
 
 [userenv.shared]
-SAWERIA_USERNAME = "zahwafe"
-SAWERIA_USER_ID = "d8e876df-405c-4e08-9708-9808b9037ea5"

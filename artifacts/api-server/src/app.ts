@@ -7,7 +7,8 @@ import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { db } from "@workspace/db";
-import { sql } from "drizzle-orm";
+import { strategiesTable, botLogsTable } from "@workspace/db";
+import { sql, isNull } from "drizzle-orm";
 import { restoreRunningBots, startLogCleanupSchedule, startTradePollSchedule } from "./lib/botEngine";
 import { startTelegramBot } from "./lib/telegramBot";
 
@@ -101,8 +102,24 @@ db.execute(sql`
   logger.warn({ err }, "DB migration: could not add password_hash column (may already exist)");
 });
 
+// Fix any null user_ids left from old code (admin = userId 0, falsy in JS)
+async function fixNullUserIds() {
+  try {
+    const fixedStrats = await db.update(strategiesTable)
+      .set({ userId: 0 })
+      .where(isNull(strategiesTable.userId));
+    const fixedLogs = await db.update(botLogsTable)
+      .set({ userId: 0 })
+      .where(isNull(botLogsTable.userId));
+    logger.info({ fixedStrats: fixedStrats.rowCount ?? 0, fixedLogs: fixedLogs.rowCount ?? 0 }, "Startup DB fix: null user_id → 0");
+  } catch (err) {
+    logger.warn({ err }, "Startup DB fix failed (non-critical)");
+  }
+}
+
 // Restore bots after startup
-setTimeout(() => {
+setTimeout(async () => {
+  await fixNullUserIds();
   restoreRunningBots().catch((err) => {
     logger.error({ err }, "Failed to restore running bots");
   });

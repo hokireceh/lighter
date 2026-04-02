@@ -325,7 +325,7 @@ export async function broadcastToAllUsers(message: string): Promise<{ sent: numb
 
 export function startTelegramBot() {
   const BOT_TOKEN = process.env.BOT_TOKEN;
-  const SAWERIA_USER_ID = process.env.SAWERIA_USER_ID;
+  const SAWERIA_USER_ID = process.env.SAWERIA_USER_ID ?? "d8e876df-405c-4e08-9708-9808b9037ea5";
   const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
 
   if (!BOT_TOKEN) { logger.warn("BOT_TOKEN tidak diset, Telegram bot tidak aktif"); return; }
