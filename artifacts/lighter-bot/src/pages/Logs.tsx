@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Terminal, Copy, Check } from "lucide-react";
 import { formatWIBDateTime } from "@/lib/utils";
 
-type LogLevel = "all" | "error" | "warn" | "info";
+type LogLevel = "all" | "error" | "warn" | "info" | "success";
 
 const LEVEL_FILTERS: { value: LogLevel; label: string }[] = [
   { value: "all", label: "Semua" },
   { value: "error", label: "ERROR" },
   { value: "warn", label: "WARN" },
   { value: "info", label: "INFO" },
+  { value: "success", label: "OK" },
 ];
 
 export default function Logs() {
@@ -105,7 +106,8 @@ export default function Logs() {
                 } ${
                   f.value === "error" && levelFilter === f.value ? "text-destructive" :
                   f.value === "warn" && levelFilter === f.value ? "text-warning" :
-                  f.value === "info" && levelFilter === f.value ? "text-blue-400" : ""
+                  f.value === "info" && levelFilter === f.value ? "text-blue-400" :
+                  f.value === "success" && levelFilter === f.value ? "text-success" : ""
                 }`}
                 onClick={() => setLevelFilter(f.value)}
               >

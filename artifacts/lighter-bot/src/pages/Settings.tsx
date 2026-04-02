@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Settings as SettingsIcon, Save, KeyRound, ShieldAlert, Search, CheckCircle2, Bell, Bot, Send, Loader2, Eye, EyeOff, AlertTriangle } from "lucide-react";
+import { Settings as SettingsIcon, Save, KeyRound, ShieldAlert, Search, CheckCircle2, Bell, Bot, Send, Loader2, Eye, EyeOff, AlertTriangle, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const configSchema = z.object({
@@ -48,6 +48,7 @@ export default function Settings() {
   const [showPrivateKey, setShowPrivateKey] = useState(false);
   const [pendingNetwork, setPendingNetwork] = useState<"mainnet" | "testnet" | null>(null);
   const [showNetworkWarning, setShowNetworkWarning] = useState(false);
+  const [showClearCredentials, setShowClearCredentials] = useState(false);
 
   const runningBots = (strategiesData?.strategies ?? []).filter((s) => s.isRunning);
 
@@ -71,6 +72,24 @@ export default function Settings() {
   const cancelNetworkChange = () => {
     setPendingNetwork(null);
     setShowNetworkWarning(false);
+  };
+
+  const handleClearCredentials = () => {
+    updateMutation.mutate(
+      { data: { accountIndex: null, apiKeyIndex: null, privateKey: null as any, l1Address: "" } },
+      {
+        onSuccess: () => {
+          form.reset({ ...form.getValues(), accountIndex: null, apiKeyIndex: null, privateKey: "", l1Address: "" });
+          setDetectedBalance(null);
+          setShowClearCredentials(false);
+          toast({ title: "Kredensial Dihapus", description: "Account Index, API Key Index, dan Private Key berhasil dihapus." });
+        },
+        onError: (err: any) => {
+          setShowClearCredentials(false);
+          toast({ title: "Error", description: err.message || "Gagal menghapus kredensial", variant: "destructive" });
+        }
+      }
+    );
   };
 
   const updateMutation = useUpdateBotConfig({
@@ -306,6 +325,21 @@ export default function Settings() {
                   <p className="text-xs text-muted-foreground">Jaga kerahasiaannya. Diperlukan untuk menandatangani order di Lighter.</p>
                 </div>
               </div>
+
+              {(config?.hasPrivateKey || config?.accountIndex != null) && (
+                <div className="flex justify-end pt-3 border-t border-border/30">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1.5 text-xs"
+                    onClick={() => setShowClearCredentials(true)}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Hapus Kredensial
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -404,6 +438,42 @@ export default function Settings() {
           </div>
         </form>
       )}
+
+      <AlertDialog open={showClearCredentials} onOpenChange={setShowClearCredentials}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="w-5 h-5" />
+              Hapus Kredensial API
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-left space-y-2">
+              <span className="block">
+                Tindakan ini akan menghapus:
+              </span>
+              <ul className="list-disc list-inside text-sm space-y-0.5 text-muted-foreground">
+                <li>Account Index</li>
+                <li>API Key Index</li>
+                <li>Private Key</li>
+                <li>L1 Address</li>
+              </ul>
+              <span className="block pt-1 font-medium text-foreground">
+                Bot yang sedang berjalan akan gagal menandatangani order sampai kredensial diisi ulang.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleClearCredentials}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={updateMutation.isPending}
+            >
+              {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
+              Hapus Sekarang
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={showNetworkWarning} onOpenChange={(open) => !open && cancelNetworkChange()}>
         <AlertDialogContent className="bg-card border-border">
