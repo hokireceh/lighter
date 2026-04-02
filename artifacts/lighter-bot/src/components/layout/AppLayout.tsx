@@ -50,7 +50,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <div className="px-5 pt-5 pb-4 border-b border-border/40">
           <div className="flex items-center gap-3">
             <img
-              src="/logo.png"
+              src="/logo.svg"
               alt="Hokireceh"
               className="w-8 h-8 rounded-xl object-contain shrink-0"
             />
@@ -145,7 +145,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       {/* ── Mobile Top Bar ──────────────────────────────────────────── */}
       <header className="md:hidden flex items-center justify-between px-4 py-2.5 border-b border-border bg-card/80 backdrop-blur-sm z-20 shrink-0">
         <div className="flex items-center gap-2.5">
-          <img src="/logo.png" alt="Hokireceh" className="w-7 h-7 rounded-lg object-contain" />
+          <img src="/logo.svg" alt="Hokireceh" className="w-7 h-7 rounded-lg object-contain" />
           <div className="leading-none">
             <div className="font-bold text-[14px] tracking-tight text-foreground">Hokireceh</div>
           </div>
