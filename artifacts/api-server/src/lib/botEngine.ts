@@ -9,6 +9,7 @@ import { getMarketInfo } from "./marketCache";
 import { initSigner, signCreateOrder } from "./lighterSigner";
 import { sendMessageToUser } from "./telegramBot";
 import { registerPriceCallback, unregisterPriceCallback, getWsCachedPrice } from "./lighterWs";
+import { checkAutoRerange, resetOutOfRangeCounter } from "./autoRerange";
 
 Decimal.set({ precision: 20, rounding: Decimal.ROUND_HALF_UP });
 
@@ -781,17 +782,17 @@ async function executeGridCheck(strategy: typeof strategiesTable.$inferSelect) {
   const mode = config.mode ?? "neutral";
   const gridSpacing = upper.sub(lower).div(levels);
 
-  // Out-of-range: log warning, do not trade
+  // Out-of-range: trigger Auto-Rerange flow (5-candle confirmation → Telegram)
   if (currentPrice.lt(lower) || currentPrice.gt(upper)) {
-    await addLog(
-      userId,
-      strategy.id,
-      strategy.name,
-      "warn",
-      `Price $${currentPrice.toFixed(2)} outside range ($${lower.toFixed(2)} - $${upper.toFixed(2)}) — waiting`
-    );
+    await checkAutoRerange(strategy, currentPrice, network, {
+      stopBotFn: stopBot,
+      startBotFn: startBot,
+    });
     return;
   }
+
+  // Price returned to range — reset consecutive out-of-range counter
+  resetOutOfRangeCounter(strategy.id);
 
   // Current level: 0 = at lower, levels-1 = near upper
   const currentLevel = Math.min(

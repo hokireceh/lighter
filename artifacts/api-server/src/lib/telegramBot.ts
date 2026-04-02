@@ -10,6 +10,7 @@ import path from "path";
 import fs from "fs";
 import { logger } from "./logger";
 import { generatePassword, addDays } from "./utils";
+import { setAutoRangeTelegramBot, registerAutoRerangeHandlers } from "./autoRerange";
 
 const PLANS = {
   "30d": { label: "30 Hari", price: 50000, days: 30, formatted: "Rp 50.000" },
@@ -338,6 +339,8 @@ export function startTelegramBot() {
   const ipv4Agent = new https.Agent({ family: 4 });
   const bot = new Telegraf<BotContext>(BOT_TOKEN, { telegram: { agent: ipv4Agent } });
   globalBotTelegram = bot.telegram;
+  setAutoRangeTelegramBot(bot.telegram);
+  registerAutoRerangeHandlers(bot);
   bot.use(session({ defaultSession: () => ({}) }));
 
   const isAdmin = (ctx: BotContext) =>
