@@ -118,10 +118,17 @@ Get user referrals
           },
           "trade_stats": {
             "$ref": "#/components/schemas/TradeStats"
+          },
+          "tier": {
+            "type": "string"
           }
         },
         "required": [
-          "trade_stats"
+          "trade_stats",
+          "l1_address",
+          "referral_code",
+          "tier",
+          "used_at"
         ]
       },
       "UserReferrals": {
@@ -134,20 +141,23 @@ Get user referrals
             "type": "string"
           },
           "cursor": {
-            "type": "integer",
-            "format": "int64"
+            "type": "string"
           },
           "referrals": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Referral"
             }
+          },
+          "used_code": {
+            "type": "string"
           }
         },
         "required": [
           "code",
           "cursor",
-          "referrals"
+          "referrals",
+          "used_code"
         ]
       },
       "TradeStats": {

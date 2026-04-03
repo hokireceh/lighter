@@ -125,6 +125,18 @@ Get public pools metadata. `auth` is required in case you specify an account_ind
           "locked_balance": {
             "type": "string",
             "example": "1000"
+          },
+          "margin_balance": {
+            "type": "string",
+            "example": "1000"
+          },
+          "margin_mode": {
+            "type": "string",
+            "example": "enabled",
+            "enum": [
+              "enabled",
+              "disabled"
+            ]
           }
         },
         "title": "AccountAsset",
@@ -132,7 +144,9 @@ Get public pools metadata. `auth` is required in case you specify an account_ind
           "symbol",
           "asset_id",
           "balance",
-          "locked_balance"
+          "locked_balance",
+          "margin_balance",
+          "margin_mode"
         ]
       },
       "PublicPoolMetadata": {
@@ -204,7 +218,8 @@ Get public pools metadata. `auth` is required in case you specify an account_ind
             "format": "int64"
           },
           "sharpe_ratio": {
-            "type": "string"
+            "type": "number",
+            "format": "double"
           },
           "total_perps_value": {
             "type": "string"

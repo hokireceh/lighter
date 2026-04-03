@@ -95,19 +95,52 @@ Get execute stats
             "format": "int64"
           },
           "slippage": {
-            "type": "string"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SlippageResult"
+            }
           }
         }
+      },
+      "SlippageResult": {
+        "type": "object",
+        "properties": {
+          "exchange": {
+            "type": "string",
+            "example": "lighter"
+          },
+          "market": {
+            "type": "string",
+            "example": "ETH"
+          },
+          "size_usd": {
+            "type": "integer",
+            "format": "int64",
+            "example": "1000"
+          },
+          "avg_slippage": {
+            "type": "number",
+            "format": "double",
+            "example": "0.5"
+          },
+          "data_count": {
+            "type": "integer",
+            "format": "int64",
+            "example": "100"
+          }
+        },
+        "title": "SlippageResult",
+        "required": [
+          "exchange",
+          "market",
+          "size_usd",
+          "avg_slippage",
+          "data_count"
+        ]
       },
       "RespGetExecuteStats": {
         "type": "object",
         "properties": {
-          "code": {
-            "type": "integer"
-          },
-          "message": {
-            "type": "string"
-          },
           "period": {
             "type": "string"
           },
@@ -117,7 +150,11 @@ Get execute stats
               "$ref": "#/components/schemas/ExecuteStat"
             }
           }
-        }
+        },
+        "required": [
+          "period",
+          "result"
+        ]
       }
     }
   }

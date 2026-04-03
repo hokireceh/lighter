@@ -107,6 +107,10 @@ Get account metadatas
           "created_at": {
             "type": "integer",
             "format": "int64"
+          },
+          "can_rfq": {
+            "type": "boolean",
+            "format": "boolean"
           }
         },
         "title": "AccountMetadata",
@@ -116,7 +120,8 @@ Get account metadatas
           "description",
           "can_invite",
           "referral_points_percentage",
-          "created_at"
+          "created_at",
+          "can_rfq"
         ]
       },
       "AccountMetadatas": {

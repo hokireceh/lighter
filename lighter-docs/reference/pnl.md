@@ -211,25 +211,44 @@ Get account PnL chart
             "example": "12.0"
           },
           "spot_inflow": {
-            "type": "string"
+            "type": "number",
+            "format": "double",
+            "example": "12.0"
           },
           "spot_outflow": {
-            "type": "string"
+            "type": "number",
+            "format": "double",
+            "example": "12.0"
           },
           "staked_lit": {
-            "type": "string"
+            "type": "number",
+            "format": "double",
+            "example": "12.0"
           },
           "staking_inflow": {
-            "type": "string"
+            "type": "number",
+            "format": "double",
+            "example": "12.0"
           },
           "staking_outflow": {
-            "type": "string"
+            "type": "number",
+            "format": "double",
+            "example": "12.0"
           },
           "staking_pnl": {
-            "type": "string"
+            "type": "number",
+            "format": "double",
+            "example": "12.0"
           },
           "trade_spot_pnl": {
-            "type": "string"
+            "type": "number",
+            "format": "double",
+            "example": "12.0"
+          },
+          "volume": {
+            "type": "number",
+            "format": "double",
+            "example": "12.0"
           }
         },
         "title": "PnLEntry",
@@ -248,7 +267,8 @@ Get account PnL chart
           "staking_inflow",
           "staking_outflow",
           "staking_pnl",
-          "trade_spot_pnl"
+          "trade_spot_pnl",
+          "volume"
         ]
       },
       "ResultCode": {

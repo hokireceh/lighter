@@ -175,16 +175,28 @@ Get candles data. Returns at most 500 candles per call. Zero values are omitted 
             "description": "Last trade ID"
           },
           "C": {
-            "type": "string"
+            "type": "number",
+            "format": "double",
+            "example": "3024.66",
+            "description": " close_raw"
           },
           "H": {
-            "type": "string"
+            "type": "number",
+            "format": "double",
+            "example": "3034.66",
+            "description": " high_raw"
           },
           "L": {
-            "type": "string"
+            "type": "number",
+            "format": "double",
+            "example": "3014.66",
+            "description": " low_raw"
           },
           "O": {
-            "type": "string"
+            "type": "number",
+            "format": "double",
+            "example": "3024.66",
+            "description": " open_raw"
           }
         },
         "title": "Candle",
@@ -218,8 +230,7 @@ Get candles data. Returns at most 500 candles per call. Zero values are omitted 
         "required": [
           "code",
           "r",
-          "c",
-          "message"
+          "c"
         ]
       },
       "ResultCode": {

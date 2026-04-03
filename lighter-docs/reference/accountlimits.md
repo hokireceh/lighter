@@ -117,6 +117,10 @@ Get account limits. For more details on account types, see this page: https://ap
           "leased_lit": {
             "type": "string",
             "description": "Total actively leased LIT."
+          },
+          "user_tier_name": {
+            "type": "string",
+            "example": "standard"
           }
         },
         "title": "AccountLimits",
@@ -129,7 +133,8 @@ Get account limits. For more details on account types, see this page: https://ap
           "current_maker_fee_tick",
           "current_taker_fee_tick",
           "effective_lit_stakes",
-          "leased_lit"
+          "leased_lit",
+          "user_tier_name"
         ]
       },
       "ResultCode": {

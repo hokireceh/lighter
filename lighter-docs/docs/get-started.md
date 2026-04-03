@@ -59,7 +59,7 @@ The code for the signer can be found in the same repo, in the [signer\_client.py
 
 When signing a transaction, you may need to provide a nonce (number used once). A nonce needs to be incremented each time you sign something. You can get the next nonce that you need to use using the **TransactionApi’s** *next\_nonce* method or take care of incrementing it yourself. Note that each nonce is handled per **API\_KEY**.
 
-If you'd like to skip nonces, you can set the `SkipNonce`  (`skip_nonce` in the Python SDK) attribute (4th in `L2TxAttributes`) to `1`. If this attribute is not specified, we require `new_nonce = old_nonce + 1`. In any case, the following must hold true: `2^47-1 > new_nonce > old_nonce`.
+If you'd like to skip nonces, you can set the `SkipNonce`  (`skip_nonce` in the Python SDK) attribute (4th in `L2TxAttributes`) to `1`. If this attribute is not specified, we require `new_nonce = old_nonce + 1`. In any case, the following must hold true when skipping nonces: `2^47-1 > new_nonce > old_nonce`. Otherwise, nonces are capped at `2^48-1`.
 
 ## Signing a transaction
 

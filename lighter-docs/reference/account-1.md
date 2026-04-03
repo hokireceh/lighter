@@ -118,6 +118,18 @@ Get account by an account's index, or L1 address
           "locked_balance": {
             "type": "string",
             "example": "1000"
+          },
+          "margin_balance": {
+            "type": "string",
+            "example": "1000"
+          },
+          "margin_mode": {
+            "type": "string",
+            "example": "enabled",
+            "enum": [
+              "enabled",
+              "disabled"
+            ]
           }
         },
         "title": "AccountAsset",
@@ -125,7 +137,9 @@ Get account by an account's index, or L1 address
           "symbol",
           "asset_id",
           "balance",
-          "locked_balance"
+          "locked_balance",
+          "margin_balance",
+          "margin_mode"
         ]
       },
       "AccountPosition": {
@@ -376,6 +390,10 @@ Get account by an account's index, or L1 address
             "items": {
               "$ref": "#/components/schemas/ApprovedIntegrator"
             }
+          },
+          "can_rfq": {
+            "type": "boolean",
+            "format": "boolean"
           }
         },
         "title": "DetailedAccount",
@@ -402,11 +420,11 @@ Get account by an account's index, or L1 address
           "cross_asset_value",
           "pool_info",
           "shares",
-          "approved_integrators",
           "account_trading_mode",
           "created_at",
           "pending_unlocks",
-          "transaction_time"
+          "transaction_time",
+          "can_rfq"
         ]
       },
       "DetailedAccounts": {
@@ -483,7 +501,8 @@ Get account by an account's index, or L1 address
             }
           },
           "sharpe_ratio": {
-            "type": "string"
+            "type": "number",
+            "format": "double"
           },
           "strategies": {
             "type": "array",

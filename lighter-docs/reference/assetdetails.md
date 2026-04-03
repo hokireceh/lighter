@@ -87,28 +87,57 @@ Get asset details for a specific asset or all assets
             "example": 18
           },
           "min_transfer_amount": {
-            "type": "integer",
-            "format": "int64",
-            "example": 1000000000000000000
+            "type": "string",
+            "example": "0.01"
           },
           "min_withdrawal_amount": {
-            "type": "integer",
-            "format": "int64",
-            "example": 1000000000000000000
+            "type": "string",
+            "example": "0.01"
           },
           "margin_mode": {
-            "type": "integer",
-            "format": "uint8",
-            "example": 1
+            "type": "string",
+            "example": "enabled",
+            "enum": [
+              "enabled",
+              "disabled"
+            ]
           },
           "index_price": {
-            "type": "integer",
-            "format": "uint32",
-            "example": 302466
+            "type": "string",
+            "example": "3024.66"
           },
           "l1_address": {
             "type": "string",
             "example": "0x0000000000000000000000000000000000000000"
+          },
+          "global_supply_cap": {
+            "type": "string",
+            "example": "1000000"
+          },
+          "liquidation_fee": {
+            "type": "string",
+            "example": "0.01"
+          },
+          "liquidation_threshold": {
+            "type": "string",
+            "example": "0.8"
+          },
+          "loan_to_value": {
+            "type": "string",
+            "example": "0.5"
+          },
+          "price_decimals": {
+            "type": "integer",
+            "format": "uint8",
+            "example": "4"
+          },
+          "total_supplied": {
+            "type": "string",
+            "example": "100"
+          },
+          "user_supply_cap": {
+            "type": "string",
+            "example": "1000"
           }
         },
         "title": "Asset",
@@ -121,7 +150,14 @@ Get asset details for a specific asset or all assets
           "min_withdrawal_amount",
           "margin_mode",
           "index_price",
-          "l1_address"
+          "l1_address",
+          "global_supply_cap",
+          "liquidation_fee",
+          "liquidation_threshold",
+          "loan_to_value",
+          "price_decimals",
+          "total_supplied",
+          "user_supply_cap"
         ]
       },
       "AssetDetails": {

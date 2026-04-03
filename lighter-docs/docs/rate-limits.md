@@ -8,9 +8,9 @@ We enforce rate limits on both REST API and WebSocket usage. These limits apply 
 
 The following limits apply to the `https://mainnet.zklighter.elliot.ai/api/v1/` base URL, excluding  `sendTx` and `sendTxBatch` where different limits, listed [below](https://apidocs.lighter.xyz/docs/rate-limits#sendtx-and-sendtxbatch-limits-premium-accounts), apply. Different limits, also listed [below](https://apidocs.lighter.xyz/docs/rate-limits#explorer-rest-api-endpoint-limits), apply to `https://explorer.elliot.ai/api/`.
 
-| Premium accounts                            | Standard accounts              |
-| :------------------------------------------ | :----------------------------- |
-| 24,000 weighted requests per rolling minute | 60 requests per rolling minute |
+| Builder accounts                             | Premium accounts                            | Standard accounts              |
+| :------------------------------------------- | :------------------------------------------ | :----------------------------- |
+| 240,000 weighted requests per rolling minute | 24,000 weighted requests per rolling minute | 60 requests per rolling minute |
 
 ### Weights:
 
@@ -27,6 +27,8 @@ The following limits apply to the `https://mainnet.zklighter.elliot.ai/api/v1/` 
 | Other endpoints                                                                                                                | 300    |
 
 While standard accounts rate limits are not weighted, whenever `{premium_weighted_requests}/{endpoint_weight} < {standard_requests}`, the former limit is going to be applied. For example, both standard and premium accounts will be able to make a maximum of 8 requests per rolling minute to the `changeAccountTier` endpoint.
+
+You can apply for a Builder Account through our Discord support channel. It’s free of charge, but we reserve the right to review applications and verify the intended use. Builder Accounts include higher limits for querying our REST API endpoints; otherwise, standard account limits apply. Builders on this tier should authenticate every request, even when not explicitly required in our documentation.
 
 ***
 
@@ -48,9 +50,7 @@ Additionally, every connection is automatically dropped after 24 hours. It's rec
 
 ## SendTx and SendTxBatch Limits (premium accounts)
 
-The following limits apply to `sendTx` and `sendTxBatch` types, regardless of whether you send the requests using REST via HTTP, or via WebSocket. For these two types, we do not enforce IP limits, but only check rate limits at the L1 address level. Standard accounts are still bound to the 60 requests per minute limit. For rate limit purposes, fee credits count as staked LIT.
-
-`sendTx` and `sendTxBatch` are the only two types constrained by [Volume Quota](https://apidocs.lighter.xyz/docs/volume-quota-program) ), necessary to create and modify orders.
+The following limits apply to `sendTx` and `sendTxBatch` requests, regardless of whether you send the requests using REST via HTTP, or via WebSocket. For these two types, we do not enforce IP limits, but only check rate limits at the L1 address level. Standard accounts are still bound to the 60 requests per minute limit. For rate limit purposes, fee credits count as staked LIT.`sendTx` and `sendTxBatch` are the only two types constrained by [Volume Quota](https://apidocs.lighter.xyz/docs/volume-quota-program), necessary to create and modify orders.
 
 | Staked LIT | sendTx/sendTxBatch per minute |
 | :--------- | :---------------------------- |

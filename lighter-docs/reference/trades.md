@@ -348,10 +348,54 @@ Get trades for lighter accounts, including sub-accounts and public pools. `auth`
             "example": "1.989696"
           },
           "ask_client_id": {
-            "type": "string"
+            "type": "integer",
+            "format": "int64",
+            "example": "145"
           },
           "bid_client_id": {
-            "type": "string"
+            "type": "integer",
+            "format": "int64",
+            "example": "245"
+          },
+          "ask_client_id_str": {
+            "type": "string",
+            "example": "145"
+          },
+          "bid_client_id_str": {
+            "type": "string",
+            "example": "245"
+          },
+          "ask_id_str": {
+            "type": "string",
+            "example": "145"
+          },
+          "bid_id_str": {
+            "type": "string",
+            "example": "245"
+          },
+          "trade_id_str": {
+            "type": "string",
+            "example": "145"
+          },
+          "integrator_maker_fee": {
+            "type": "integer",
+            "format": "int32",
+            "example": "50"
+          },
+          "integrator_maker_fee_collector_index": {
+            "type": "integer",
+            "format": "int64",
+            "example": "156"
+          },
+          "integrator_taker_fee": {
+            "type": "integer",
+            "format": "int32",
+            "example": "50"
+          },
+          "integrator_taker_fee_collector_index": {
+            "type": "integer",
+            "format": "int64",
+            "example": "156"
           }
         },
         "title": "Trade",
@@ -381,10 +425,15 @@ Get trades for lighter accounts, including sub-accounts and public pools. `auth`
           "ask_client_id",
           "bid_account_pnl",
           "bid_client_id",
-          "maker_fee",
-          "taker_fee",
           "maker_position_sign_changed",
-          "taker_position_sign_changed"
+          "taker_position_sign_changed",
+          "ask_client_id_str",
+          "bid_client_id_str",
+          "trade_id_str",
+          "integrator_maker_fee",
+          "integrator_maker_fee_collector_index",
+          "integrator_taker_fee",
+          "integrator_taker_fee_collector_index"
         ]
       },
       "Trades": {

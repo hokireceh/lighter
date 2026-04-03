@@ -82,7 +82,13 @@ Get token list and their metadata
           "paprika_id",
           "market",
           "asset_type",
-          "categories"
+          "categories",
+          "is_allowed_mainnet",
+          "is_allowed_staging",
+          "is_allowed_testnet",
+          "is_asset_allowed_mainnet",
+          "is_asset_allowed_staging",
+          "is_asset_allowed_testnet"
         ],
         "properties": {
           "symbol": {
@@ -136,6 +142,30 @@ Get token list and their metadata
             "items": {
               "type": "string"
             }
+          },
+          "is_allowed_mainnet": {
+            "type": "boolean",
+            "format": "boolean"
+          },
+          "is_allowed_staging": {
+            "type": "boolean",
+            "format": "boolean"
+          },
+          "is_allowed_testnet": {
+            "type": "boolean",
+            "format": "boolean"
+          },
+          "is_asset_allowed_mainnet": {
+            "type": "boolean",
+            "format": "boolean"
+          },
+          "is_asset_allowed_staging": {
+            "type": "boolean",
+            "format": "boolean"
+          },
+          "is_asset_allowed_testnet": {
+            "type": "boolean",
+            "format": "boolean"
           }
         }
       },

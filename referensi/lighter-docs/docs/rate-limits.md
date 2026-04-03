@@ -28,7 +28,7 @@ The following limits apply to the `https://mainnet.zklighter.elliot.ai/api/v1/` 
 
 While standard accounts rate limits are not weighted, whenever `{premium_weighted_requests}/{endpoint_weight} < {standard_requests}`, the former limit is going to be applied. For example, both standard and premium accounts will be able to make a maximum of 8 requests per rolling minute to the `changeAccountTier` endpoint.
 
-You can apply for a Builder Account through our Discord support channel. It’s free of charge, but we reserve the right to review applications and verify the intended use. Builder Accounts include higher limits for querying our REST API endpoints; otherwise, standard account limits apply.
+You can apply for a Builder Account through our Discord support channel. It’s free of charge, but we reserve the right to review applications and verify the intended use. Builder Accounts include higher limits for querying our REST API endpoints; otherwise, standard account limits apply. Builders on this tier should authenticate every request, even when not explicitly required in our documentation.
 
 ***
 

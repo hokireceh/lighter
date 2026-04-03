@@ -121,7 +121,6 @@ Get order books metadata
           "liquidation_mode",
           "force_reduce_only",
           "trading_hours",
-          "funding_fee_discounts_enabled",
           "hidden"
         ]
       },
