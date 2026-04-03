@@ -1332,6 +1332,13 @@ export async function pollPendingTrades() {
       // txStatus === 3 without executed_at = committed but not yet executed → keep polling
     }
   } catch (err) {
+    // PostgreSQL error 42P01 = undefined_table (migration not yet run at startup)
+    // Treat as transient startup condition — log WARN and skip this cycle silently
+    const pgCode = (err as any)?.cause?.code ?? (err as any)?.code;
+    if (pgCode === "42P01") {
+      logger.warn("pollPendingTrades: trades table not ready yet, skipping cycle");
+      return;
+    }
     logger.error({ err }, "Error during pending trade poll");
   }
 }

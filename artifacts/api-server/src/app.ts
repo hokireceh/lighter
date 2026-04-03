@@ -117,19 +117,31 @@ async function fixNullUserIds() {
   }
 }
 
-// Restore bots after startup
+// Restore bots after startup, then start trade polling after DB health-check
 setTimeout(async () => {
   await fixNullUserIds();
   restoreRunningBots().catch((err) => {
     logger.error({ err }, "Failed to restore running bots");
   });
+
+  // DB health-check: verify trades table exists before starting poller
+  // If table is not ready yet, 42P01 guard in pollPendingTrades() handles each cycle
+  try {
+    await db.execute(sql`SELECT 1 FROM trades LIMIT 1`);
+    logger.info("DB health-check passed: trades table ready");
+  } catch (err) {
+    const pgCode = (err as any)?.cause?.code ?? (err as any)?.code;
+    if (pgCode === "42P01") {
+      logger.warn("DB health-check: trades table not yet available — poller will skip cycles until migration completes");
+    } else {
+      logger.warn({ err }, "DB health-check: unexpected error — poller starting anyway");
+    }
+  }
+  startTradePollSchedule();
 }, 3000);
 
 // Start log cleanup schedule (runs daily, keeps last 30 days)
 startLogCleanupSchedule();
-
-// Poll pending trades for status updates every 15 seconds
-startTradePollSchedule();
 
 // Start Telegram bot
 setTimeout(() => {
