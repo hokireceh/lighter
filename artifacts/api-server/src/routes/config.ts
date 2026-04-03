@@ -140,6 +140,32 @@ router.post("/strategies", async (req: AuthRequest, res) => {
       gridConfig?: object;
     };
 
+    if (body.type === "grid" && !body.gridConfig) {
+      return res.status(400).json({ error: "gridConfig is required for grid strategy", field: "gridConfig" });
+    }
+
+    // Validate gridConfig when type is "grid"
+    if (body.type === "grid" && body.gridConfig) {
+      const g = body.gridConfig as Record<string, unknown>;
+      const gridLevels = Number(g["gridLevels"]);
+      const lowerPrice = Number(g["lowerPrice"]);
+      const upperPrice = Number(g["upperPrice"]);
+      const investmentAmount = Number(g["investmentAmount"]);
+
+      if (!Number.isFinite(gridLevels) || gridLevels < 2) {
+        return res.status(400).json({ error: "gridLevels must be at least 2", field: "gridLevels" });
+      }
+      if (!Number.isFinite(lowerPrice) || lowerPrice <= 0) {
+        return res.status(400).json({ error: "lowerPrice must be greater than 0", field: "lowerPrice" });
+      }
+      if (!Number.isFinite(upperPrice) || upperPrice <= lowerPrice) {
+        return res.status(400).json({ error: "upperPrice must be greater than lowerPrice", field: "upperPrice" });
+      }
+      if (!Number.isFinite(investmentAmount) || investmentAmount <= 0) {
+        return res.status(400).json({ error: "investmentAmount must be greater than 0", field: "investmentAmount" });
+      }
+    }
+
     const config = await getBotConfig(req.userId!);
     const marketSymbol = await getMarketSymbol(body.marketIndex, config.network);
 
