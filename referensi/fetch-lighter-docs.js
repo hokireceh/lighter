@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 // ─── OUTPUT FOLDER ────────────────────────────────────────────────────────────
-const ROOT = './lighter-docs';
+const ROOT = path.join(__dirname, 'lighter-docs');
 
 // ─── DOCS PAGES ───────────────────────────────────────────────────────────────
 // Format: [url-slug, saved-filename]

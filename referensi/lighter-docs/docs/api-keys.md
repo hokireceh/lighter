@@ -6,9 +6,9 @@ Each internal account, whether that's a master account or a sub-account, will ha
 
 ## Permissions
 
-API keys enable both write and read permissions, allowing you to query auth-gated REST endpoints and Websocket channel, but also send transactions and process withdrawals.
+API keys enable both write and read permissions, allowing you to query auth-gated REST endpoints and Websocket channels, but also send transactions and process withdrawals.
 
-While it allows to process withdrawals, you should consider that only secure withdrawals can be executed without also providing the account's Ethereum private key - as they can only be sent to the same L1 address that created the account. On the other hand, Fast Withdrawals and Transfers can be sent to other L1 addresses and will require the wallet's private key.
+While it allows for processing withdrawals, you should consider that only secure withdrawals can be executed without also signing the account's Ethereum private key - as they can only be sent to the same L1 address that created the account. On the other hand, Fast Withdrawals and Transfers can be sent to other L1 addresses and will require signing with the wallet's private key.
 
 ## Authentication
 
@@ -17,6 +17,18 @@ To interact with certain endpoints, you will need to generate an auth token usin
 ## Read-only Authentication
 
 Using a canonical auth code, you can generate read-only auth tokens - those won't allow placing trades nor request withdrawals (essentially, you won't be able to sign transactions hence initialize a signer client), but you will be able to access auth-gated data via API. Each read-only auth code can have a maximum expiry of 10 years, and a minimum of 1 day. They will use the following structure: `ro:{account_index}:{single|all}:{expiry_unix}:{random_hex}`. You can generate one using the [createToken](https://apidocs.lighter.xyz/reference/tokens_create) endpoint, or [via front-end](https://app.lighter.xyz/read-only-tokens/).
+
+## Maker-only API keys
+
+Clients on a premium account may mark up to 200 keys per account index as maker-only. Those keys will be restricted to 0ms speed bump transactions only:
+
+* Post-only (ALO) orders
+* Modify orders on ALO orders
+* Cancel, and Cancel All orders
+
+The direct benefit of using this configuration is having access to an optimized execution path, with reduced scheduling latency. Keys reserved by our front-end (0-3) cannot be set as maker-only, and we apply a one-hour cooldown in between changes.
+
+You can set a list of keys as maker-only using [setMakerOnlyApiKeys](https://apidocs.lighter.xyz/reference/setmakeronlyapikeys), and get a list of maker-only keys using [getMakerOnlyApiKeys](https://apidocs.lighter.xyz/reference/getmakeronlyapikeys).
 
 ## How to create API keys programmatically
 

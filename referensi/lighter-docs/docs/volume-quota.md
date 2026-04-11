@@ -13,7 +13,7 @@ For more details on transaction types, see [constants.go](https://github.com/ell
 
 For every 3 USD of trading volume, traders receive an additional transaction limit (i.e. volume quota increases by 1). `SendTx` and `SendTxBatch` requests will return a response indicating the remaining quota, e.g. "10780 volume quota remaining.". Every 15 seconds, you get a free `SendTx` which won't consume volume quota (nor show remaining quota). Volume quota is shared across all sub-accounts under the same L1 address.
 
-New accounts start at 1K quota, and you can stack at most 5.000.000 TX allowance in your volume quota, which does not expire.
+New accounts start at 1K quota, and you can stack at most 15.000.000 TX allowance in your volume quota, which does not expire.
 
 This differs from Rate Limits, which enforce a maximum of **24000** weight per **60** seconds (rolling minute) for premium accounts. You can check the weight of the endpoints, and standard accounts limits here: [Rate Limits](https://apidocs.lighter.xyz/docs/rate-limits).
 

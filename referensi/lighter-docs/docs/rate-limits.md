@@ -6,7 +6,7 @@ We enforce rate limits on both REST API and WebSocket usage. These limits apply 
 
 ## REST API Endpoint Limits
 
-The following limits apply to the `https://mainnet.zklighter.elliot.ai/api/v1/` base URL, excluding  `sendTx` and `sendTxBatch` where different limits, listed [below](https://apidocs.lighter.xyz/docs/rate-limits#sendtx-and-sendtxbatch-limits-premium-accounts), apply. Different limits, also listed [below](https://apidocs.lighter.xyz/docs/rate-limits#explorer-rest-api-endpoint-limits), apply to `https://explorer.elliot.ai/api/`.
+The following limits apply to the `https://mainnet.zklighter.elliot.ai/api/v1/` base URL, excluding  `sendTx` and `sendTxBatch` where different limits, listed [below](https://apidocs.lighter.xyz/docs/rate-limits#sendtx-and-sendtxbatch-limits-premium-accounts), apply. Different limits, also listed [below](https://apidocs.lighter.xyz/docs/rate-limits#explorer-rest-api-endpoint-limits), apply to `https://explorer.elliot.ai/api/`. To bypass IP-based rate limits, clients can authenticate each request so that only L1-based rate limits apply.
 
 | Builder accounts                             | Premium accounts                            | Standard accounts              |
 | :------------------------------------------- | :------------------------------------------ | :----------------------------- |
@@ -28,7 +28,7 @@ The following limits apply to the `https://mainnet.zklighter.elliot.ai/api/v1/` 
 
 While standard accounts rate limits are not weighted, whenever `{premium_weighted_requests}/{endpoint_weight} < {standard_requests}`, the former limit is going to be applied. For example, both standard and premium accounts will be able to make a maximum of 8 requests per rolling minute to the `changeAccountTier` endpoint.
 
-You can apply for a Builder Account through our Discord support channel. It’s free of charge, but we reserve the right to review applications and verify the intended use. Builder Accounts include higher limits for querying our REST API endpoints; otherwise, standard account limits apply. Builders on this tier should authenticate every request, even when not explicitly required in our documentation.
+You can apply for a Builder Account through our Discord support channel. It’s free of charge, but we reserve the right to review applications and verify the intended use. Builder Accounts include higher limits for querying our read-only REST API endpoints, excluding `sendTx` and `sendTxBatch`; otherwise, standard account limits apply. Builders on this tier should authenticate every request, even when not explicitly required in our documentation.
 
 ***
 
