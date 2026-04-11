@@ -38,10 +38,10 @@ Sebelum bisa trading live, buka **Settings** di dashboard dan isi:
 | Field | Keterangan |
 |-------|-----------|
 | **Private Key** | Private key API kamu (bukan private key wallet L1!) — didapat saat membuat API key di platform Lighter |
-| **Account Index** | Indeks akun Lighter kamu — bisa dicek via Settings di [app.lighter.xyz](https://app.lighter.xyz) atau query API dengan L1 address |
-| **API Key Index** | Indeks API key yang kamu buat — terlihat di halaman [app.lighter.xyz/apikeys](https://app.lighter.xyz/apikeys). Gunakan index yang kamu buat sendiri (bukan yang sudah ada sebelumnya) |
+| **Account Index** | Indeks akun Lighter kamu — bisa dicek via Settings di [app.lighter.xyz](https://app.lighter.xyz/?referral=HOKIRECEH) atau query API dengan L1 address |
+| **API Key Index** | Indeks API key yang kamu buat — terlihat di halaman [app.lighter.xyz/apikeys](https://app.lighter.xyz/?referral=HOKIRECEH). Gunakan index yang kamu buat sendiri (bukan yang sudah ada sebelumnya) |
 
-> **Cara mendapatkan API Key:** Buka [app.lighter.xyz](https://app.lighter.xyz) → Settings → API Keys → Create New Key. Catat index dan private key yang diberikan.
+> **Cara mendapatkan API Key:** Buka [app.lighter.xyz](https://app.lighter.xyz/?referral=HOKIRECEH) → Settings → API Keys → Create New Key. Catat index dan private key yang diberikan.
 >
 > Tanpa ini, bot berjalan dalam mode **Paper Trading** (simulasi, tidak ada order nyata).
 
