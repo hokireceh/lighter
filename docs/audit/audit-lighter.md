@@ -23,8 +23,8 @@
 
 | Severity | Jumlah |
 |---|---|
-| CRITICAL | 1 |
-| HIGH | 4 |
+| CRITICAL | 1 → **0 (fixed)** |
+| HIGH | 4 → **3 (1 already fixed)** |
 | MEDIUM | 4 |
 | LOW | 2 |
 | COSMETIC | 2 |
@@ -38,7 +38,7 @@
 ---
 
 ### LIGHTER-BOT-001
-**Severity:** CRITICAL  
+**Severity:** ~~CRITICAL~~ → **FIXED** (2026-04-11)  
 **Kategori:** Race Condition — Start/Stop Concurrent  
 **File:** `artifacts/api-server/src/lib/botEngine.ts`  
 **Baris:** 959–960  
@@ -258,7 +258,7 @@ Ganti `setInterval` dengan `setTimeout` rekursif yang membaca interval dari DB s
 ---
 
 ### LIGHTER-BOT-006
-**Severity:** HIGH  
+**Severity:** ~~HIGH~~ → **CLOSED — ALREADY FIXED** (gridLastLevel sudah ada di DB schema sebelum audit)  
 **Kategori:** State Management — gridLastLevel Tidak Dipersist ke DB  
 **File:** `artifacts/api-server/src/lib/botEngine.ts`  
 **Baris:** 41–42 (deklarasi), 806–817 (init), 845–846 (update)  

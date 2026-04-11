@@ -40,6 +40,12 @@ interface GridState {
 const runningBots = new Map<number, RunningBot>();
 const gridStates = new Map<number, GridState>();
 
+// Tracks strategyIds that are currently in the process of starting.
+// Closes the TOCTOU window between `runningBots.has()` check and `runningBots.set()`.
+// Without this, two concurrent startBot() calls can both pass the has() guard before
+// either reaches set(), resulting in duplicate timers and duplicate WS callbacks.
+const startingBots = new Set<number>();
+
 // Minimum ms between WS-triggered grid checks per strategy (avoids rapid-fire on volatile ticks)
 const WS_GRID_COOLDOWN_MS = 10_000;
 // strategyId → timestamp of last WS-triggered run
@@ -958,6 +964,13 @@ async function runStrategyOnce(strategyId: number) {
 
 export async function startBot(strategyId: number): Promise<boolean> {
   if (runningBots.has(strategyId)) return true;
+  // Guard against concurrent startBot() calls for the same strategyId.
+  // runningBots.has() alone has a TOCTOU race: two async callers can both
+  // pass the check before either reaches runningBots.set() ~100ms later.
+  if (startingBots.has(strategyId)) return true;
+  startingBots.add(strategyId);
+
+  try {
 
   const strategy = await db.query.strategiesTable.findFirst({
     where: eq(strategiesTable.id, strategyId),
@@ -1081,6 +1094,10 @@ export async function startBot(strategyId: number): Promise<boolean> {
   setTimeout(() => runStrategyOnce(strategyId), 2000);
 
   return true;
+
+  } finally {
+    startingBots.delete(strategyId);
+  }
 }
 
 export async function stopBot(strategyId: number): Promise<boolean> {
