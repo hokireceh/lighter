@@ -1086,16 +1086,33 @@ export async function startBot(strategyId: number): Promise<boolean> {
     );
   }
 
-  const timer = setInterval(async () => {
+  // Use recursive setTimeout instead of setInterval so the DCA interval is
+  // re-read from DB after every tick. Config changes (e.g. intervalMinutes update
+  // via UI) therefore take effect on the very next cycle — no restart required.
+  // Note: clearInterval(timeout) works in Node.js — stopBot() needs no changes.
+  const scheduleDcaTick = async () => {
+    if (!runningBots.has(strategyId)) return;
+
+    await runStrategyOnce(strategyId);
+
+    if (!runningBots.has(strategyId)) return;
+
+    // Re-read the strategy from DB to pick up any interval config changes.
+    const freshStrategy = await db.query.strategiesTable
+      .findFirst({ where: eq(strategiesTable.id, strategyId) })
+      .catch(() => null);
+    const nextInterval = freshStrategy?.type === "dca"
+      ? ((freshStrategy.dcaConfig as { intervalMinutes?: number })?.intervalMinutes ?? 60) * 60 * 1000
+      : GRID_FALLBACK_INTERVAL_MS;
+
     const bot = runningBots.get(strategyId);
     if (bot) {
-      const nextInterval = strategy.type === "dca"
-        ? ((strategy.dcaConfig as { intervalMinutes?: number })?.intervalMinutes ?? 60) * 60 * 1000
-        : GRID_FALLBACK_INTERVAL_MS;
+      bot.timer = setTimeout(scheduleDcaTick, nextInterval);
       bot.nextRunAt = new Date(Date.now() + nextInterval);
     }
-    await runStrategyOnce(strategyId);
-  }, intervalMs);
+  };
+
+  const timer = setTimeout(scheduleDcaTick, intervalMs);
 
   runningBots.set(strategyId, { strategyId, timer, nextRunAt });
 
