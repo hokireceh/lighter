@@ -1,6 +1,6 @@
 import { db } from "@workspace/db";
 import { strategiesTable, tradesTable, botLogsTable, usersTable } from "@workspace/db";
-import { eq, desc, lt, sql, and, isNotNull, ne } from "drizzle-orm";
+import { eq, desc, lt, sql, and, isNotNull, ne, count } from "drizzle-orm";
 import Decimal from "decimal.js";
 import { logger } from "./logger";
 import { getBotConfig, getNotificationConfig } from "../routes/configService";
@@ -212,6 +212,27 @@ async function executeDcaOrder(strategy: typeof strategiesTable.$inferSelect) {
   if (!config) return;
 
   const userId = strategy.userId ?? null;
+
+  // ── Enforce maxOrders — HARD STOP ────────────────────────────────────────────
+  // maxOrders limits the total number of filled DCA orders. Check before any
+  // expensive I/O (getBotConfig, getCurrentPrice) so we fail fast.
+  if (config.maxOrders != null && config.maxOrders > 0) {
+    const [row] = await db
+      .select({ total: count() })
+      .from(tradesTable)
+      .where(and(eq(tradesTable.strategyId, strategy.id), eq(tradesTable.status, "filled")));
+    const filledCount = row?.total ?? 0;
+    if (filledCount >= config.maxOrders) {
+      await addLog(
+        userId, strategy.id, strategy.name, "info",
+        `DCA maxOrders limit reached — stopping bot`,
+        `Configured maxOrders: ${config.maxOrders} | Filled orders: ${filledCount}`
+      );
+      await stopBot(strategy.id);
+      return;
+    }
+  }
+
   const botConfig = userId !== null ? await getBotConfig(userId) : null;
   const hasCredentials = !!(botConfig?.privateKey && botConfig?.accountIndex != null);
   const network = botConfig?.network ?? "mainnet";
