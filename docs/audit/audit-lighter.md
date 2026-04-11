@@ -108,7 +108,7 @@ Kode existing **sudah benar**:
 ---
 
 ### LIGHTER-BOT-003
-**Severity:** HIGH  
+**Severity:** ~~HIGH~~ → **FIXED** (2026-04-11)  
 **Kategori:** SL/TP — Operator Comparison, Edge Case  
 **File:** `artifacts/api-server/src/lib/botEngine.ts`  
 **Baris:** 748, 763  
@@ -143,7 +143,7 @@ Risiko nyata: jika ada path di UI atau DB migration yang menyimpan `0` sebagai n
 ---
 
 ### LIGHTER-BOT-004
-**Severity:** HIGH  
+**Severity:** ~~HIGH~~ → **FIXED** (2026-04-11)  
 **Kategori:** DCA Logic — maxOrders Tidak Pernah Di-enforce  
 **File:** `artifacts/api-server/src/lib/botEngine.ts`  
 **Baris:** 197–204 (type definition), 196–274 (executeDcaOrder)  
@@ -192,7 +192,7 @@ Untuk menegakkan ini, jumlah order yang sudah dieksekusi perlu di-query dari `tr
 ---
 
 ### LIGHTER-BOT-005
-**Severity:** HIGH  
+**Severity:** ~~HIGH~~ → **FIXED** (2026-04-11)  
 **Kategori:** DCA Logic — Interval Tidak Beradaptasi Setelah Config Update  
 **File:** `artifacts/api-server/src/lib/botEngine.ts`  
 **Baris:** 1025–1027, 1055–1064  
@@ -315,7 +315,7 @@ if (restoredLevel != null) {
 ---
 
 ### LIGHTER-BOT-007
-**Severity:** MEDIUM  
+**Severity:** ~~MEDIUM~~ → **FIXED** (2026-04-11)  
 **Kategori:** Grid Logic — Batch Orders Semua Menggunakan Harga yang Sama  
 **File:** `artifacts/api-server/src/lib/botEngine.ts`  
 **Baris:** 860–927 (executeGridCheck), 603–624 (executeBatchLiveOrders)  
@@ -369,7 +369,7 @@ for (const lvl of crossedLevels) {
 ---
 
 ### LIGHTER-BOT-008
-**Severity:** MEDIUM  
+**Severity:** ~~MEDIUM~~ → **FIXED** (2026-04-11)  
 **Kategori:** Error Handling — sendTx Retries Non-Retryable Errors  
 **File:** `artifacts/api-server/src/lib/lighterApi.ts`  
 **Baris:** 376–431  
@@ -426,7 +426,7 @@ Lebih serius: **double-spend risk** jika Lighter menerima tx (HTTP 200) tapi kod
 ---
 
 ### LIGHTER-BOT-009
-**Severity:** MEDIUM  
+**Severity:** ~~MEDIUM~~ → **FIXED** (2026-04-11)  
 **Kategori:** State Management — pollPendingTrades Bisa Overlap  
 **File:** `artifacts/api-server/src/lib/botEngine.ts`  
 **Baris:** 1183–1184, 1186–1344, 1346–1349  
@@ -473,7 +473,7 @@ export function startTradePollSchedule() {
 ---
 
 ### LIGHTER-BOT-010
-**Severity:** MEDIUM  
+**Severity:** ~~MEDIUM~~ → **FIXED** (2026-04-11)  
 **Kategori:** AutoRerange — Stop→Start Tidak Atomic, Window WS Gap  
 **File:** `artifacts/api-server/src/lib/autoRerange.ts`  
 **Baris:** 246–248  
@@ -509,7 +509,7 @@ Tambah `await new Promise(r => setTimeout(r, 100))` antara stop dan start sebaga
 ---
 
 ### LIGHTER-BOT-011
-**Severity:** LOW  
+**Severity:** ~~LOW~~ → **FIXED** (2026-04-11)  
 **Kategori:** State Management — generateToken() Entropy Lemah  
 **File:** `artifacts/api-server/src/lib/autoRerange.ts`  
 **Baris:** 98–100  
@@ -539,7 +539,7 @@ Jika seseorang mengetahui `strategyId` dan bisa meng-enumerate token (41 bit = ~
 ---
 
 ### LIGHTER-BOT-012
-**Severity:** LOW  
+**Severity:** ~~LOW~~ → **FIXED** (2026-04-11)  
 **Kategori:** State Management — cleanupOldLogs Membuang Hasil DB  
 **File:** `artifacts/api-server/src/lib/botEngine.ts`  
 **Baris:** 1155–1162  
@@ -570,7 +570,7 @@ export async function cleanupOldLogs() {
 ---
 
 ### LIGHTER-BOT-013
-**Severity:** COSMETIC  
+**Severity:** ~~COSMETIC~~ → **FIXED** (2026-04-11)  
 **Kategori:** Routes — Response Message Salah untuk Bot Sudah Berjalan  
 **File:** `artifacts/api-server/src/routes/bot.ts`  
 **Baris:** 18–39  
@@ -607,7 +607,7 @@ Jika user atau frontend memanggil `/bot/start/123` pada bot yang sudah berjalan,
 ---
 
 ### LIGHTER-BOT-014
-**Severity:** COSMETIC  
+**Severity:** ~~COSMETIC~~ → **CLARIFIED** (2026-04-11) — undici WebSocket (WHATWG) tidak expose ping(); height subscribe adalah keepalive yang valid; comment diperbaiki  
 **Kategori:** WebSocket — Keepalive Subscribe ke Channel "height" Bukan Ping  
 **File:** `artifacts/api-server/src/lib/lighterWs.ts`  
 **Baris:** 49–57  

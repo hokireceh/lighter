@@ -1,3 +1,4 @@
+import { randomBytes } from "crypto";
 import { db } from "@workspace/db";
 import { strategiesTable, botLogsTable, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
@@ -96,7 +97,7 @@ async function writeLog(
 }
 
 function generateToken(): string {
-  return Math.random().toString(36).substring(2, 10);
+  return randomBytes(8).toString("hex"); // 64-bit cryptographically secure entropy
 }
 
 async function getUserChatId(userId: number | null): Promise<string | null> {
@@ -243,8 +244,13 @@ async function handleApprove(token: string, ctx: any): Promise<void> {
     `Auto-Rerange disetujui — Range baru $${newConfig.lowerPrice.toFixed(2)} – $${newConfig.upperPrice.toFixed(2)}, Grid ${newConfig.gridLevels} levels`
   );
 
-  // Stop then restart so grid state initialises fresh with new range
+  // Stop then restart so grid state initialises fresh with new range.
+  // A small buffer between stop and start ensures stopBot's DB write
+  // (isRunning: false) fully commits before startBot reads and overwrites it
+  // (isRunning: true). Without this, a write reorder under load could leave
+  // the DB showing isRunning: false despite the bot being alive.
   await stopBotFn(strategyId);
+  await new Promise(r => setTimeout(r, 200));
   await startBotFn(strategyId);
 
   resetOutOfRangeCounter(strategyId);

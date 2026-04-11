@@ -48,8 +48,13 @@ function unsubscribeMarket(marketIndex: number): void {
 
 function startKeepalive(): void {
   if (keepaliveTimer) clearInterval(keepaliveTimer);
-  // Send every 25 s — well within Lighter's 2-minute requirement
-  // and short enough to survive Apache/Nginx proxy timeout (typically 60–300 s).
+  // Lighter requires at least one frame every 2 minutes to keep the connection alive.
+  // The WHATWG WebSocket API (used by undici) does not expose ws.ping() — that method
+  // is only available on the 'ws' npm package. Subscribing to the lightweight
+  // "height" channel is the equivalent: it sends one outbound frame per interval and
+  // the server-sent height updates are intentionally ignored by our message handler.
+  // Interval: 25 s — well within Lighter's 2-min requirement and safely under
+  // typical proxy idle timeouts (60–300 s).
   keepaliveTimer = setInterval(() => {
     if (ws?.readyState === WebSocket.OPEN) {
       sendJson({ type: "subscribe", channel: "height" });

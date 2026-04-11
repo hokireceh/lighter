@@ -5,6 +5,7 @@ import { desc, eq, and, gte, asc } from "drizzle-orm";
 import {
   startBot,
   stopBot,
+  isRunning,
   getNextRunAt,
   getAllRunningBots,
 } from "../lib/botEngine";
@@ -18,6 +19,7 @@ router.use(authMiddleware as any);
 router.post("/start/:strategyId", async (req: AuthRequest, res) => {
   const strategyId = parseInt(String(req.params.strategyId));
   try {
+    const wasRunning = isRunning(strategyId);
     const success = await startBot(strategyId);
     if (!success) {
       return res.status(404).json({ error: "Strategy not found" });
@@ -26,7 +28,7 @@ router.post("/start/:strategyId", async (req: AuthRequest, res) => {
     res.json({
       strategyId,
       isRunning: true,
-      message: "Bot started successfully",
+      message: wasRunning ? "Bot already running" : "Bot started successfully",
       nextRunAt: nextRunAt?.toISOString() ?? null,
     });
   } catch (err) {

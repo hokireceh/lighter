@@ -42,6 +42,15 @@ async function lighterFetch<T>(path: string, network: Network = "mainnet", optio
     } catch (err: any) {
       clearTimeout(timer);
       if (err.name === "AbortError") throw new Error(`Lighter API timeout after ${LIGHTER_FETCH_TIMEOUT_MS}ms: ${path}`);
+      // Transient network error (ECONNRESET, ECONNREFUSED, etc.) — retry with backoff.
+      // Timeout (AbortError) is thrown immediately; retrying a timed-out request
+      // would only add more latency on top of a slow endpoint.
+      if (attempt < LIGHTER_MAX_RETRIES - 1) {
+        const waitMs = 1000 * Math.pow(2, attempt);
+        logger.warn({ path, attempt, errMsg: err.message }, "Lighter API network error, retrying...");
+        await sleep(waitMs);
+        continue;
+      }
       throw err;
     }
     clearTimeout(timer);
@@ -391,6 +400,12 @@ export async function sendTx(
     } catch (err: any) {
       clearTimeout(timer);
       if (err.name === "AbortError") throw new Error(`sendTx timeout after ${LIGHTER_FETCH_TIMEOUT_MS}ms`);
+      if (attempt < LIGHTER_MAX_RETRIES - 1) {
+        const waitMs = 1000 * Math.pow(2, attempt);
+        logger.warn({ attempt, errMsg: err.message }, "sendTx network error, retrying...");
+        await sleep(waitMs);
+        continue;
+      }
       throw err;
     }
     clearTimeout(timer);
@@ -487,6 +502,12 @@ export async function sendTxBatch(
     } catch (err: any) {
       clearTimeout(timer);
       if (err.name === "AbortError") throw new Error(`sendTxBatch timeout after ${LIGHTER_FETCH_TIMEOUT_MS}ms`);
+      if (attempt < LIGHTER_MAX_RETRIES - 1) {
+        const waitMs = 1000 * Math.pow(2, attempt);
+        logger.warn({ attempt, errMsg: err.message }, "sendTxBatch network error, retrying...");
+        await sleep(waitMs);
+        continue;
+      }
       throw err;
     }
     clearTimeout(timer);

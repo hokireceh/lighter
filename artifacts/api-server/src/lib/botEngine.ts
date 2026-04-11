@@ -772,7 +772,7 @@ async function executeGridCheck(strategy: typeof strategiesTable.$inferSelect) {
   }
 
   // SL/TP check
-  if (config.stopLoss && currentPrice.lt(config.stopLoss)) {
+  if (config.stopLoss != null && config.stopLoss > 0 && currentPrice.lt(config.stopLoss)) {
     await addLog(userId, strategy.id, strategy.name, "warn",
       `Stop Loss triggered at $${currentPrice.toFixed(2)} (SL: $${config.stopLoss})`,
       "Bot stopped automatically due to stop loss"
@@ -787,7 +787,7 @@ async function executeGridCheck(strategy: typeof strategiesTable.$inferSelect) {
     return;
   }
 
-  if (config.takeProfit && currentPrice.gt(config.takeProfit)) {
+  if (config.takeProfit != null && config.takeProfit > 0 && currentPrice.gt(config.takeProfit)) {
     await addLog(userId, strategy.id, strategy.name, "success",
       `Take Profit triggered at $${currentPrice.toFixed(2)} (TP: $${config.takeProfit})`,
       "Bot stopped automatically due to take profit"
@@ -939,19 +939,46 @@ async function executeGridCheck(strategy: typeof strategiesTable.$inferSelect) {
       limitPriceOffset: config.limitPriceOffset ?? 0,
     });
   } else {
-    // Multiple levels crossed — send all orders in a single sendTxBatch call
-    await executeBatchLiveOrders({
-      userId,
-      strategy,
-      botConfig: botConfig!,
-      side,
-      size,
-      currentPrice,
-      network,
-      orderCount,
-      orderKind: config.orderType ?? "market",
-      limitPriceOffset: config.limitPriceOffset ?? 0,
-    });
+    // Multiple levels crossed
+    const orderKind = config.orderType ?? "market";
+
+    if (orderKind === "market") {
+      // Market orders are IOC — they fill at the best available price regardless
+      // of the signed price field. Batching all at currentPrice is safe and fast.
+      await executeBatchLiveOrders({
+        userId,
+        strategy,
+        botConfig: botConfig!,
+        side,
+        size,
+        currentPrice,
+        network,
+        orderCount,
+        orderKind,
+        limitPriceOffset: config.limitPriceOffset ?? 0,
+      });
+    } else {
+      // Limit / post_only orders must sit at their respective grid level prices.
+      // Sending all at currentPrice would stack them on one level — the grid would
+      // occupy orderbook quota at a single price instead of spreading across levels.
+      const limitPriceOffset = config.limitPriceOffset ?? 0;
+      for (let i = 0; i < orderCount; i++) {
+        const levelIndex = direction === "down" ? lastLevel - 1 - i : lastLevel + 1 + i;
+        const levelPrice = lower.add(gridSpacing.mul(levelIndex));
+        const levelSize = amountPerGrid.div(levelPrice);
+        await executeLiveOrder({
+          userId,
+          strategy,
+          botConfig: botConfig!,
+          side,
+          size: levelSize,
+          currentPrice: levelPrice,
+          network,
+          orderKind,
+          limitPriceOffset,
+        });
+      }
+    }
   }
 }
 
@@ -1211,7 +1238,7 @@ export async function cleanupOldLogs() {
   try {
     const cutoff = new Date(Date.now() - LOG_RETENTION_DAYS * 24 * 60 * 60 * 1000);
     const result = await db.delete(botLogsTable).where(lt(botLogsTable.createdAt, cutoff));
-    logger.info({ cutoff }, "Old bot logs cleaned up");
+    logger.info({ cutoff, deleted: (result as any).rowCount ?? "unknown" }, "Old bot logs cleaned up");
   } catch (err) {
     logger.error({ err }, "Failed to cleanup old logs");
   }
@@ -1238,7 +1265,14 @@ export function startLogCleanupSchedule() {
 const TRADE_POLL_INTERVAL_MS = 5_000;   // 5 s — fast enough for IOC market orders
 const TRADE_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 
+// Guard against concurrent poll cycles. If a poll takes longer than 5 s (many
+// pending trades, slow getTx responses), the next setInterval tick must not
+// start a second cycle — it would double-count stats via updateStrategyStatsAtomic.
+let _pollRunning = false;
+
 export async function pollPendingTrades() {
+  if (_pollRunning) return;
+  _pollRunning = true;
   try {
     const pendingTrades = await db.query.tradesTable.findMany({
       where: and(
@@ -1395,6 +1429,8 @@ export async function pollPendingTrades() {
       return;
     }
     logger.error({ err }, "Error during pending trade poll");
+  } finally {
+    _pollRunning = false;
   }
 }
 
