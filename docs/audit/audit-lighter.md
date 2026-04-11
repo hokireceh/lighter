@@ -23,11 +23,12 @@
 
 | Severity | Jumlah |
 |---|---|
-| CRITICAL | 2 |
+| CRITICAL | 1 |
 | HIGH | 4 |
 | MEDIUM | 4 |
 | LOW | 2 |
 | COSMETIC | 2 |
+| CLOSED (false positive) | 1 |
 | **Total** | **14** |
 
 ---
@@ -78,38 +79,31 @@ Tidak ada `startingBots = new Set<number>()` untuk menutup window ini.
 ---
 
 ### LIGHTER-BOT-002
-**Severity:** CRITICAL  
-**Kategori:** WebSocket — Channel Parsing Bug  
+**Severity:** ~~CRITICAL~~ → **CLOSED — FALSE POSITIVE**  
+**Kategori:** WebSocket — Channel Parsing  
 **File:** `artifacts/api-server/src/lib/lighterWs.ts`  
 **Baris:** 41 (subscribe), 105 (parse)  
+**Diverifikasi:** 2026-04-11 dari `referensi/lighter-docs/docs/websocket.md`
 
-#### Kode Bermasalah
-```typescript
-// Baris 41 — subscribe dengan separator SLASH:
-function subscribeMarket(marketIndex: number): void {
-  sendJson({ type: "subscribe", channel: `ticker/${marketIndex}` });
-}
+#### Hasil Verifikasi
 
-// Baris 104–106 — parse dengan separator COLON:
-const channel: string = msg.channel ?? "";
-const marketIndex = parseInt(channel.split(":")[1] ?? "");
-if (isNaN(marketIndex)) return;
+Lighter WS menggunakan format **asimetris** yang terdokumentasi resmi:
+
+| Arah | Format | Contoh |
+|---|---|---|
+| Subscribe (client → server) | `ticker/MARKET_INDEX` (slash) | `"ticker/0"` |
+| Response (server → client) | `ticker:MARKET_INDEX` (colon) | `"ticker:0"` |
+
+Dikonfirmasi oleh contoh respons aktual di docs:
+```json
+{ "channel": "ticker:0", "type": "update/ticker" }
 ```
 
-#### Dampak Nyata
-Subscribe mengirim `channel: "ticker/1"`. Jika Lighter WebSocket mengembalikan field `channel` dengan format yang sama (`"ticker/1"`), maka `"ticker/1".split(":")[1]` = `undefined`, dan `parseInt(undefined)` = `NaN`. Blok `if (isNaN(marketIndex)) return` menghentikan seluruh pemrosesan.
+Kode existing **sudah benar**:
+- Baris 41: subscribe dengan slash ✅
+- Baris 105: parse response dengan `split(":")` ✅
 
-**Akibat:** Tidak ada price callback yang pernah dipanggil → Grid bot sepenuhnya jatuh ke fallback timer 5 menit → Semua grid order terlambat rata-rata 2.5 menit per trigger → Missed level crossing → Order tidak dikirim saat seharusnya.
-
-Perlu diverifikasi format channel response dari Lighter WS docs (`referensi/lighter-docs/reference/websocket.md`). Jika Lighter mengembalikan `"ticker:1"` (colon), maka bug ini tidak aktif. Jika menggunakan `"ticker/1"` (slash), ini adalah bug CRITICAL yang aktif.
-
-#### Diff Fix yang Direkomendasikan
-```diff
--const marketIndex = parseInt(channel.split(":")[1] ?? "");
-+// Support both "ticker/1" and "ticker:1" formats
-+const sep = channel.includes(":") ? ":" : "/";
-+const marketIndex = parseInt(channel.split(sep)[1] ?? "");
-```
+**Tidak ada bug. Tidak ada fix diperlukan.**
 
 ---
 
