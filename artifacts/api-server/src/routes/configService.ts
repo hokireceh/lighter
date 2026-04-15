@@ -20,12 +20,11 @@ const CONFIG_KEYS = {
 
 const ENCRYPTED_KEYS = new Set([CONFIG_KEYS.PRIVATE_KEY, CONFIG_KEYS.NOTIFY_BOT_TOKEN]);
 
-async function getConfigValue(userId: number, key: string): Promise<string | null> {
-  const row = await db.query.botConfigTable.findFirst({
-    where: and(eq(botConfigTable.userId, userId), eq(botConfigTable.key, key)),
+async function getAllConfigValues(userId: number): Promise<Map<string, string>> {
+  const rows = await db.query.botConfigTable.findMany({
+    where: eq(botConfigTable.userId, userId),
   });
-  if (!row?.value) return null;
-  return ENCRYPTED_KEYS.has(key) ? decrypt(row.value) : row.value;
+  return new Map(rows.map((r) => [r.key, r.value]));
 }
 
 async function setConfigValue(userId: number, key: string, value: string) {
@@ -49,22 +48,26 @@ async function deleteConfigValue(userId: number, key: string) {
 }
 
 export async function getBotConfig(userId: number) {
-  const [accountIndex, apiKeyIndex, privateKey, network, l1Address,
-    notifyOnBuy, notifyOnSell, notifyOnError, notifyOnStart, notifyOnStop,
-    notifyBotToken, notifyChatId] = await Promise.all([
-    getConfigValue(userId, CONFIG_KEYS.ACCOUNT_INDEX),
-    getConfigValue(userId, CONFIG_KEYS.API_KEY_INDEX),
-    getConfigValue(userId, CONFIG_KEYS.PRIVATE_KEY),
-    getConfigValue(userId, CONFIG_KEYS.NETWORK),
-    getConfigValue(userId, CONFIG_KEYS.L1_ADDRESS),
-    getConfigValue(userId, CONFIG_KEYS.NOTIFY_ON_BUY),
-    getConfigValue(userId, CONFIG_KEYS.NOTIFY_ON_SELL),
-    getConfigValue(userId, CONFIG_KEYS.NOTIFY_ON_ERROR),
-    getConfigValue(userId, CONFIG_KEYS.NOTIFY_ON_START),
-    getConfigValue(userId, CONFIG_KEYS.NOTIFY_ON_STOP),
-    getConfigValue(userId, CONFIG_KEYS.NOTIFY_BOT_TOKEN),
-    getConfigValue(userId, CONFIG_KEYS.NOTIFY_CHAT_ID),
-  ]);
+  const all = await getAllConfigValues(userId);
+
+  const get = (key: string): string | null => all.get(key) ?? null;
+  const getDecrypted = (key: string): string | null => {
+    const v = all.get(key);
+    return v ? decrypt(v) : null;
+  };
+
+  const accountIndex   = get(CONFIG_KEYS.ACCOUNT_INDEX);
+  const apiKeyIndex    = get(CONFIG_KEYS.API_KEY_INDEX);
+  const privateKey     = getDecrypted(CONFIG_KEYS.PRIVATE_KEY);
+  const network        = get(CONFIG_KEYS.NETWORK);
+  const l1Address      = get(CONFIG_KEYS.L1_ADDRESS);
+  const notifyOnBuy    = get(CONFIG_KEYS.NOTIFY_ON_BUY);
+  const notifyOnSell   = get(CONFIG_KEYS.NOTIFY_ON_SELL);
+  const notifyOnError  = get(CONFIG_KEYS.NOTIFY_ON_ERROR);
+  const notifyOnStart  = get(CONFIG_KEYS.NOTIFY_ON_START);
+  const notifyOnStop   = get(CONFIG_KEYS.NOTIFY_ON_STOP);
+  const notifyBotToken = getDecrypted(CONFIG_KEYS.NOTIFY_BOT_TOKEN);
+  const notifyChatId   = get(CONFIG_KEYS.NOTIFY_CHAT_ID);
 
   return {
     accountIndex: accountIndex !== null ? parseInt(accountIndex) : null,

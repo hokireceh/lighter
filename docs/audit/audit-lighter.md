@@ -721,6 +721,7 @@ app.use(cors({
 1. ✅ LIGHTER-BOT-015 FIXED (CORS wildcard)
 2. ✅ LIGHTER-BOT-016 FIXED (passwordHash dead code + timing-safe compare)
 3. ✅ LIGHTER-BOT-017 FIXED (DCA config validation)
-4. Menunggu approval untuk LIGHTER-BOT-018
-5. File belum diaudit dari scope: `routes/history.ts`, `routes/market.ts`, `routes/ai.ts`, `routes/health.ts`, `routes/index.ts`, `lib/groqAI.ts`, DB schema files, frontend `artifacts/lighter-bot/src/`
-6. File tidak ditemukan (perlu konfirmasi): `smartBroadcaster.ts`, `sessionStore.ts`, `neonBroadcastDb.ts`, `lib/shared/tolerance.ts`, routes sub-folder `lighter/`, `extended/`, `ethereal/`
+4. ✅ LIGHTER-BOT-018 FIXED (getBotConfig 12 → 1 query)
+5. Menunggu approval untuk LIGHTER-BOT-019
+6. File belum diaudit dari scope: DB schema files, frontend `artifacts/lighter-bot/src/`
+7. Issue tercatat carry-over: `parseInt` tanpa NaN guard di `routes/market.ts` (Medium)
