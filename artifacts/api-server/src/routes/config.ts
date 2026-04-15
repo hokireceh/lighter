@@ -166,6 +166,27 @@ router.post("/strategies", async (req: AuthRequest, res) => {
       }
     }
 
+    // Validate dcaConfig when type is "dca"
+    if (body.type === "dca") {
+      if (!body.dcaConfig) {
+        return res.status(400).json({ error: "dcaConfig is required for dca strategy", field: "dcaConfig" });
+      }
+      const d = body.dcaConfig as Record<string, unknown>;
+      const amountPerOrder = Number(d["amountPerOrder"]);
+      const intervalMinutes = Number(d["intervalMinutes"]);
+      const side = d["side"];
+
+      if (!Number.isFinite(amountPerOrder) || amountPerOrder <= 0) {
+        return res.status(400).json({ error: "amountPerOrder must be greater than 0", field: "amountPerOrder" });
+      }
+      if (!Number.isFinite(intervalMinutes) || intervalMinutes < 1) {
+        return res.status(400).json({ error: "intervalMinutes must be at least 1", field: "intervalMinutes" });
+      }
+      if (side !== "buy" && side !== "sell") {
+        return res.status(400).json({ error: "side must be 'buy' or 'sell'", field: "side" });
+      }
+    }
+
     const config = await getBotConfig(req.userId!);
     const marketSymbol = await getMarketSymbol(body.marketIndex, config.network);
 
