@@ -153,22 +153,20 @@ async function upsertUser(
   telegramName: string, plan: PlanKey, password: string
 ) {
   const planInfo = PLANS[plan];
-  const bcrypt = await import("bcryptjs");
-  const passwordHash = await bcrypt.hash(password, 12);
   const existing = await db.query.usersTable.findFirst({ where: eq(usersTable.telegramId, telegramId) });
 
   if (existing) {
     const base = existing.expiresAt > new Date() ? existing.expiresAt : new Date();
     const newExpiry = addDays(base, planInfo.days);
     await db.update(usersTable)
-      .set({ password, passwordHash, plan, expiresAt: newExpiry, isActive: true, updatedAt: new Date() })
+      .set({ password, plan, expiresAt: newExpiry, isActive: true, updatedAt: new Date() })
       .where(eq(usersTable.telegramId, telegramId));
     return { password, expiresAt: newExpiry, isNew: false };
   } else {
     const expiresAt = addDays(new Date(), planInfo.days);
     await db.insert(usersTable).values({
       telegramId, telegramUsername: telegramUsername ?? null,
-      telegramName, password, passwordHash, plan, expiresAt, isActive: true,
+      telegramName, password, plan, expiresAt, isActive: true,
     });
     return { password, expiresAt, isNew: true };
   }

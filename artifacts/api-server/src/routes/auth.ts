@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "crypto";
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { usersTable } from "@workspace/db";
@@ -25,7 +26,10 @@ router.post("/login", async (req, res) => {
   if (!trimmed) return res.status(400).json({ error: "Password diperlukan" });
 
   const adminPassword = process.env.ADMIN_PASSWORD;
-  if (adminPassword && trimmed === adminPassword) {
+  const isAdmin = adminPassword
+    && trimmed.length === adminPassword.length
+    && timingSafeEqual(Buffer.from(trimmed), Buffer.from(adminPassword));
+  if (isAdmin) {
     res.cookie(COOKIE_NAME, trimmed, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -88,7 +92,9 @@ router.get("/me", async (req, res) => {
   if (!password) return res.status(401).json({ error: "Unauthorized" });
 
   const adminPassword = process.env.ADMIN_PASSWORD;
-  if (adminPassword && password === adminPassword) {
+  if (adminPassword
+    && password.length === adminPassword.length
+    && timingSafeEqual(Buffer.from(password), Buffer.from(adminPassword))) {
     return res.json({
       id: 0,
       telegramId: "admin",

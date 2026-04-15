@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "crypto";
 import type { Request, Response, NextFunction } from "express";
 import { db } from "@workspace/db";
 import { usersTable } from "@workspace/db";
@@ -26,7 +27,7 @@ export async function authMiddleware(req: AuthRequest, res: Response, next: Next
   if (!password) return res.status(401).json({ error: "Unauthorized" });
 
   const adminPassword = process.env.ADMIN_PASSWORD;
-  if (adminPassword && password === adminPassword) {
+  if (adminPassword && timingSafeEqual(Buffer.from(password), Buffer.from(adminPassword))) {
     req.userId = 0;
     req.userTelegramId = "admin";
     return next();
@@ -58,7 +59,10 @@ export function adminMiddleware(req: Request, res: Response, next: NextFunction)
   if (!adminPassword) return res.status(503).json({ error: "Admin not configured" });
 
   const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith("Bearer ") || authHeader.slice(7).trim() !== adminPassword) {
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
+  const validToken = token.length === adminPassword.length
+    && timingSafeEqual(Buffer.from(token), Buffer.from(adminPassword));
+  if (!validToken) {
     return res.status(401).json({ error: "Admin access required" });
   }
   next();

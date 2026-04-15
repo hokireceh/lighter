@@ -701,9 +701,25 @@ app.use(cors({
 
 ---
 
+### LIGHTER-BOT-016
+**Severity:** ~~HIGH~~ → **FIXED** (2026-04-15)  
+**Kategori:** Security — `passwordHash` Half-Implemented (Computed tapi Tidak Diverifikasi)  
+**File:** `artifacts/api-server/src/lib/telegramBot.ts`, `artifacts/api-server/src/middlewares/auth.ts`, `artifacts/api-server/src/routes/auth.ts`
+
+#### Masalah
+`upsertUser()` di `telegramBot.ts` menghitung `bcrypt.hash(password, 12)` dan menyimpannya ke `passwordHash`, tapi `authMiddleware` selalu membandingkan via `eq(usersTable.password, password)` — plaintext SQL lookup. Hash tidak pernah dibaca untuk verifikasi. Selain itu, perbandingan string `===` untuk admin password rentan terhadap timing attack.
+
+#### Diff Fix (Opsi A — konsisten dengan arsitektur license-key system)
+1. Hapus `bcrypt.hash()` dan `passwordHash` dari `upsertUser()` di `telegramBot.ts`  
+2. Ganti `===` admin password comparison dengan `crypto.timingSafeEqual()` di `authMiddleware`, `adminMiddleware`, dan `routes/auth.ts`  
+3. Hapus `bcryptjs` dan `@types/bcryptjs` dari `package.json`
+
+---
+
 ## Langkah Selanjutnya
 
-1. ✅ LIGHTER-BOT-015 FIXED
-2. Menunggu approval untuk LIGHTER-BOT-016 (HIGH — passwordHash half-implemented)
-3. File belum diaudit dari scope: `routes/history.ts`, `routes/market.ts`, `routes/ai.ts`, `routes/health.ts`, `routes/index.ts`, `lib/groqAI.ts`, DB schema files, frontend `artifacts/lighter-bot/src/`
-4. File tidak ditemukan (perlu konfirmasi): `smartBroadcaster.ts`, `sessionStore.ts`, `neonBroadcastDb.ts`, `lib/shared/tolerance.ts`, routes sub-folder `lighter/`, `extended/`, `ethereal/`
+1. ✅ LIGHTER-BOT-015 FIXED (CORS wildcard)
+2. ✅ LIGHTER-BOT-016 FIXED (passwordHash dead code + timing-safe compare)
+3. Menunggu approval untuk LIGHTER-BOT-017 (MEDIUM — DCA config tidak divalidasi server-side)
+4. File belum diaudit dari scope: `routes/history.ts`, `routes/market.ts`, `routes/ai.ts`, `routes/health.ts`, `routes/index.ts`, `lib/groqAI.ts`, DB schema files, frontend `artifacts/lighter-bot/src/`
+5. File tidak ditemukan (perlu konfirmasi): `smartBroadcaster.ts`, `sessionStore.ts`, `neonBroadcastDb.ts`, `lib/shared/tolerance.ts`, routes sub-folder `lighter/`, `extended/`, `ethereal/`
