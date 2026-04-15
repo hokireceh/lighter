@@ -78,10 +78,24 @@ app.use(
   }),
 );
 
-app.use(cors({
-  origin: true,
-  credentials: true,
-}));
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ?? "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no Origin header (curl, Postman, server-to-server, mobile)
+      if (!origin) return callback(null, true);
+      if (ALLOWED_ORIGINS.length === 0 || ALLOWED_ORIGINS.includes(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error(`CORS: origin '${origin}' not allowed`));
+    },
+    credentials: true,
+  })
+);
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

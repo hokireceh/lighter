@@ -661,11 +661,49 @@ Berdasarkan review file, tidak ada referensi ke "Extended Engine" atau "Ethereal
 
 ---
 
+### LIGHTER-BOT-015
+**Severity:** ~~HIGH~~ → **FIXED** (2026-04-15)  
+**Kategori:** Security — CORS Wildcard + Credentials  
+**File:** `artifacts/api-server/src/app.ts`  
+**Baris:** 81–84
+
+#### Kode Bermasalah
+```typescript
+app.use(cors({
+  origin: true,      // reflect ANY origin
+  credentials: true,
+}));
+```
+
+#### Dampak
+`origin: true` + `credentials: true` memungkinkan *setiap website* membuat credentialed request (dengan cookie `lb_session`) ke API. Potensi CSRF via CORS — bot bisa dinyalakan/dihentikan dari halaman pihak ketiga.
+
+#### Diff Fix
+```diff
+-app.use(cors({
+-  origin: true,
+-  credentials: true,
+-}));
++const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ?? "")
++  .split(",").map((o) => o.trim()).filter(Boolean);
++
++app.use(cors({
++  origin: (origin, callback) => {
++    if (!origin) return callback(null, true);
++    if (ALLOWED_ORIGINS.length === 0 || ALLOWED_ORIGINS.includes(origin))
++      return callback(null, true);
++    callback(new Error(`CORS: origin '${origin}' not allowed`));
++  },
++  credentials: true,
++}));
+```
+> Fallback: jika `ALLOWED_ORIGINS` tidak diset, semua origin diizinkan (backward-compatible). Konfigurasikan `ALLOWED_ORIGINS` di env production untuk enforcement penuh.
+
+---
+
 ## Langkah Selanjutnya
 
-1. Review dan setujui temuan ini
-2. Konfirmasi LIGHTER-BOT-002 dengan membaca `referensi/lighter-docs/reference/websocket.md` (format channel response)
-3. Berikan persetujuan untuk mulai perbaikan, urutkan sesuai prioritas atau sekaligus
-4. Setelah fix, perlu migration DB untuk LIGHTER-BOT-006 (`grid_last_level` column)
-
-**Tidak ada perubahan kode yang dilakukan dalam dokumen ini. Semua fix di atas hanyalah rekomendasi.**
+1. ✅ LIGHTER-BOT-015 FIXED
+2. Menunggu approval untuk LIGHTER-BOT-016 (HIGH — passwordHash half-implemented)
+3. File belum diaudit dari scope: `routes/history.ts`, `routes/market.ts`, `routes/ai.ts`, `routes/health.ts`, `routes/index.ts`, `lib/groqAI.ts`, DB schema files, frontend `artifacts/lighter-bot/src/`
+4. File tidak ditemukan (perlu konfirmasi): `smartBroadcaster.ts`, `sessionStore.ts`, `neonBroadcastDb.ts`, `lib/shared/tolerance.ts`, routes sub-folder `lighter/`, `extended/`, `ethereal/`
